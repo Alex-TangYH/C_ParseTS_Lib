@@ -61,7 +61,7 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 	return patBean;
 }
 
-//传如文件路径，进行解析
+//传入文件路径，进行解析
 JNIEXPORT jint JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseTSFileNative(JNIEnv *env, jclass clazz, jstring filePath)
 {
 	const char *str;
