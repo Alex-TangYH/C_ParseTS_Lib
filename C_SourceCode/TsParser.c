@@ -99,6 +99,7 @@ int ParseTransportStream(FILE *pfTsFile)
 	int iEmmPosition = 0;
 	int iEmmCount = 0;
 
+	TS_PAT_T stPat = { 0 };
 	PAT_INFO_T stPAT_Info[PROGRAM_MAX] = { 0 };
 	PMT_INFO_T stPMT_Info[PROGRAM_MAX] = { 0 };
 	CAT_INFO_T stCAT_Info[CA_SYSTEM_MAX] = { 0 };
@@ -137,7 +138,7 @@ int ParseTransportStream(FILE *pfTsFile)
 		}
 	}
 
-	iProgramCount = ParsePAT_Table(pfTsFile, iTsPosition, iTsLength, stPAT_Info);
+	iProgramCount = ParsePAT_Table(pfTsFile, iTsPosition, iTsLength, stPAT_Info, &stPat);
 	if (iProgramCount <= 0)
 	{
 		return -1;

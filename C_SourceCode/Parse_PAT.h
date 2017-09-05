@@ -23,9 +23,7 @@ typedef struct TS_PAT_T
 	unsigned int uiCurrent_next_indicator :1;
 	unsigned int uiSection_number :8;
 	unsigned int uiLast_section_number :8;
-
 	TS_PAT_PROGRAM_T stPAT_Program[PAT_PROGARM_MAX];
-
 	unsigned int uiNetwork_PID :13;
 	unsigned long uiCRC_32 :32;
 } TS_PAT_T;
@@ -36,5 +34,5 @@ typedef struct PAT_INFO_T
 	unsigned int uiPMT_PID :13;
 } PAT_INFO_T;
 
-int ParsePAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, PAT_INFO_T *pstPAT_Info);
+int ParsePAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, PAT_INFO_T *pstPAT_Info,TS_PAT_T *pstTS_PAT_T);
 #endif

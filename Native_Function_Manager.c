@@ -7,18 +7,57 @@
 
 #include <jni.h>
 #include <string.h>
-#include "C_SourceCode/TsParser.h"
 #include "com_alex_ts_parser_native_function_NativeFunctionManager.h"
+#include "C_SourceCode/ParseTS_Length.h"
+#include "C_SourceCode/TsParser.h"
+#include "C_SourceCode/Parse_EIT.h"
+#include "C_SourceCode/Parse_EMM.h"
+#include "C_SourceCode/Parse_PAT.h"
+#include "C_SourceCode/Parse_PMT.h"
+#include "C_SourceCode/Parse_CAT.h"
+#include "C_SourceCode/Parse_SDT.h"
+#include "C_SourceCode/Parse_BAT.h"
+#include "C_SourceCode/Parse_NIT.h"
+#include "C_SourceCode/Parse_TDT.h"
+#include "C_SourceCode/Parse_TOT.h"
+#include "C_SourceCode/Parse_RST.h"
+#include "C_SourceCode/Parse_ST.h"
+#include "C_SourceCode/Parse_DIT.h"
+#include "C_SourceCode/Parse_SIT.h"
+#include "C_SourceCode/TestFuction.h"
+#include "C_SourceCode/GetPsiTableInfo.h"
 
 //解析PAT
 JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parsePAT(JNIEnv *env, jclass obj)
 {
 	jclass patBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/PAT_Table");
-	jmethodID constrocMID = (*env)->GetMethodID(env, patBeanClass, "<init>", "(IIIIIIIIIII[Ljava/lang/Object;IJ)V");
+	jmethodID patConstrocMID = (*env)->GetMethodID(env, patBeanClass, "<init>", "(IIIIIIIIIII[Lcom/alex/ts_parser/bean/psi/PAT_ProgramInfo;II)V");
+	jclass patInfoBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/PAT_ProgramInfo");
+	jmethodID patInfoConstrocMID = (*env)->GetMethodID(env, patInfoBeanClass, "<init>", "(III)V");
 
-	//TODO 解析本地PAT表，将PAT表的各个字段赋值，传入patBean构造函数中
-
-	jobject patBean = (*env)->NewObject(env, patBeanClass, constrocMID);//需要增加参数
+	char cFilePath[] = "D:\\test\\test.ts";
+	FILE *pfTsFile = NULL;
+	pfTsFile = fopen(cFilePath, "rb");
+	if (NULL == pfTsFile)
+	{
+		pfTsFile = fopen(cFilePath, "rb");
+		if (NULL == pfTsFile)
+		{
+			DUBUGPRINTF("file does not exist \n");
+			return 0;
+		}
+	}
+	int i = 0;
+	TS_PAT_T stPat = { 0 };
+	int iProgramCount = GetPatTable(pfTsFile, &stPat);
+	jobjectArray patInfoArray = (*env)->NewObjectArray(env, iProgramCount, patInfoBeanClass, NULL);
+	for (i = 0; i < iProgramCount; i++)
+	{
+		jobject patinfoBean = (*env)->NewObject(env, patInfoBeanClass, patInfoConstrocMID, stPat.stPAT_Program[i].uiProgram_number, stPat.stPAT_Program[i].uiReserved, stPat.stPAT_Program[i].uiProgram_map_PID);
+		(*env)->SetObjectArrayElement(env, patInfoArray, i, patinfoBean);
+	}
+	jobject patBean = (*env)->NewObject(env, patBeanClass, patConstrocMID, stPat.uiTable_id, stPat.uiSection_syntax_indicator, stPat.uiZero, stPat.uiReserved_first, stPat.uiSection_length, stPat.uiTransport_stream_id, stPat.uiReserved_second,
+			stPat.uiVersion_number, stPat.uiCurrent_next_indicator, stPat.uiSection_number, stPat.uiLast_section_number, patInfoArray, stPat.uiNetwork_PID, stPat.uiCRC_32); //需要增加参数
 	return patBean;
 }
 

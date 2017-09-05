@@ -142,13 +142,12 @@ void PrintPAT(TS_PAT_T *pstTS_PAT_T, int iPAT_ProgramCount)
  * 从TS流中解析PAT表
  *
  ******************************************/
-int ParsePAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, PAT_INFO_T *pstPAT_Info_T)
+int ParsePAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, PAT_INFO_T *pstPAT_Info_T, TS_PAT_T *pstTS_PAT_T)
 {
 	DUBUGPRINTF("\n=================================ParsePAT_Table Start================================= \n");
 	int iTemp = 0;
 	int iInfoCount = 0;
 	int iPATProgramCount = 0;
-	TS_PAT_T stTS_PAT_T = { 0 };
 	unsigned int uiVersion = INITIAL_VERSION;
 	unsigned int uiRecordSectionNumber[SECTION_COUNT_256] = { 0 };
 	unsigned char ucSectionBuffer[SECTION_MAX_LENGTH_4096] = { 0 };
@@ -176,12 +175,12 @@ int ParsePAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, PAT_INFO_T *p
 				if (0 == IsSectionGetBefore(ucSectionBuffer, uiRecordSectionNumber))
 				{
 					DUBUGPRINTF("Enter if (0 == IsSectionGetBefore) in PARSE_PAT\n");
-					iPATProgramCount = ParsePAT_Section(&stTS_PAT_T, ucSectionBuffer);
+					iPATProgramCount = ParsePAT_Section(pstTS_PAT_T, ucSectionBuffer);
 
-					GetPAT_Info(&stTS_PAT_T, iPATProgramCount, pstPAT_Info_T, &iInfoCount);
+					GetPAT_Info(pstTS_PAT_T, iPATProgramCount, pstPAT_Info_T, &iInfoCount);
 					if (1 == PRINTFPAT_INFO)
 					{
-						PrintPAT(&stTS_PAT_T, iPATProgramCount);
+						PrintPAT(pstTS_PAT_T, iPATProgramCount);
 					}
 				}
 				if (1 == IsAllSectionOver(ucSectionBuffer, uiRecordSectionNumber))
