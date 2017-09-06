@@ -55,7 +55,7 @@ void PrintTOT(TS_TOT_T *pstTS_TOT)
 	{
 		memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 		sprintf(acOutputPrefix, "TOT->");
-		ParseDescriptor(pstTS_TOT->aucDescriptor, pstTS_TOT->uiDescriptors_loop_length, acOutputPrefix);
+		ParseAndPrintDescriptor(pstTS_TOT->aucDescriptor, pstTS_TOT->uiDescriptors_loop_length, acOutputPrefix);
 	}
 	else
 	{

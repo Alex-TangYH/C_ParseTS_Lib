@@ -70,7 +70,7 @@ void PrintSIT(TS_SIT_T *pstTS_SIT)
 	{
 		memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 		sprintf(acOutputPrefix, "SIT->.");
-		ParseDescriptor(pstTS_SIT->aucSIT_info_descriptor, pstTS_SIT->uiTransmission_info_loop_length, acOutputPrefix);
+		ParseAndPrintDescriptor(pstTS_SIT->aucSIT_info_descriptor, pstTS_SIT->uiTransmission_info_loop_length, acOutputPrefix);
 	}
 	DUBUGPRINTF("SIT->CRC32: 0x%08lx\n", pstTS_SIT->uiCRC32);
 	DUBUGPRINTF("\n-------------SIT info end-------------\n");

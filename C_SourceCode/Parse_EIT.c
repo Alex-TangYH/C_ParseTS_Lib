@@ -124,7 +124,7 @@ void PrintEIT(TS_EIT_T *pstTS_EIT, int iEIT_InfoCount)
 		{
 			memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 			sprintf(acOutputPrefix, "EIT->EIT_info[%d].", iLoopTime);
-			ParseDescriptor(pstTS_EIT->astEIT_info[iLoopTime].aucDescriptor, pstTS_EIT->astEIT_info[iLoopTime].uiDescriptors_loop_length, acOutputPrefix);
+			ParseAndPrintDescriptor(pstTS_EIT->astEIT_info[iLoopTime].aucDescriptor, pstTS_EIT->astEIT_info[iLoopTime].uiDescriptors_loop_length, acOutputPrefix);
 		}
 	}
 	DUBUGPRINTF("\n-------------EIT info end-------------\n");

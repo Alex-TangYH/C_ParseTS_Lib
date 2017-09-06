@@ -106,7 +106,7 @@ void PrintBAT(TS_BAT_T *pstTS_BAT, int iBAT_InfoCount)
 	{
 		memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 		sprintf(acOutputPrefix, "BAT->");
-		ParseDescriptor(pstTS_BAT->aucDescriptor, pstTS_BAT->uiBoquet_descriptor_length, acOutputPrefix);
+		ParseAndPrintDescriptor(pstTS_BAT->aucDescriptor, pstTS_BAT->uiBoquet_descriptor_length, acOutputPrefix);
 	}
 	
 	DUBUGPRINTF("BAT->Reserved_future_use_second: 0x%02x\n", pstTS_BAT->uiReserved_future_use_second);
@@ -124,7 +124,7 @@ void PrintBAT(TS_BAT_T *pstTS_BAT, int iBAT_InfoCount)
 		{
 			memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 			sprintf(acOutputPrefix, "BAT->BAT_info[%d].", iLoopTime);
-			ParseDescriptor(pstTS_BAT->stBAT_info[iLoopTime].aucDescriptor, pstTS_BAT->stBAT_info[iLoopTime].uiTransport_descriptor_length, acOutputPrefix);
+			ParseAndPrintDescriptor(pstTS_BAT->stBAT_info[iLoopTime].aucDescriptor, pstTS_BAT->stBAT_info[iLoopTime].uiTransport_descriptor_length, acOutputPrefix);
 		}
 	}
 	DUBUGPRINTF("\n-------------BAT info end-------------\n");

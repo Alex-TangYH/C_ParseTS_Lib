@@ -102,7 +102,7 @@ void PrintNIT(TS_NIT_T * pstTS_NIT, int iNIT_TransportStreamCount)
 	{
 		memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 		sprintf(acOutputPrefix, "NIT->");
-		ParseDescriptor(pstTS_NIT->ucDescriptor, pstTS_NIT->uiNetwork_descriptor_length, acOutputPrefix);
+		ParseAndPrintDescriptor(pstTS_NIT->ucDescriptor, pstTS_NIT->uiNetwork_descriptor_length, acOutputPrefix);
 	}
 	DUBUGPRINTF("NIT->Reserved_future_use_second : 0x%02x \n", pstTS_NIT->uiReserved_future_use_second);
 	DUBUGPRINTF("NIT->Transport_stream_loop_Length : 0x%02x \n", pstTS_NIT->uiTransport_stream_loop_Length);
@@ -120,7 +120,7 @@ void PrintNIT(TS_NIT_T * pstTS_NIT, int iNIT_TransportStreamCount)
 			{
 				memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 				sprintf(acOutputPrefix, "NIT->NIT_stream[%d].", iLoopTime);
-				ParseDescriptor(pstTS_NIT->stNIT_stream[iLoopTime].aucDescriptor, pstTS_NIT->stNIT_stream[iLoopTime].uiTransport_descriport_length, acOutputPrefix);
+				ParseAndPrintDescriptor(pstTS_NIT->stNIT_stream[iLoopTime].aucDescriptor, pstTS_NIT->stNIT_stream[iLoopTime].uiTransport_descriport_length, acOutputPrefix);
 			}
 		}
 	}

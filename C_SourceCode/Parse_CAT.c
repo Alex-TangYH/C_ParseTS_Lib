@@ -94,7 +94,7 @@ void PrintCAT(TS_CAT_T *pstTS_CAT)
 	{
 		memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 		sprintf(acOutputPrefix, "CAT->Descriptor.");
-		ParseDescriptor(pstTS_CAT->aucDescriptor, iDescriptorLength, acOutputPrefix);
+		ParseAndPrintDescriptor(pstTS_CAT->aucDescriptor, iDescriptorLength, acOutputPrefix);
 	}
 	else
 	{

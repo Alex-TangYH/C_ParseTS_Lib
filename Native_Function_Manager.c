@@ -26,14 +26,19 @@
 #include "C_SourceCode/Parse_SIT.h"
 #include "C_SourceCode/TestFuction.h"
 #include "C_SourceCode/GetPsiTableInfo.h"
+#include "C_SourceCode/Parse_DesciptorStream.h"
+#include "C_SourceCode/Print_Descriptor.h"
 
 //解析CAT
 JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseCAT(JNIEnv *env, jclass obj)
 {
 	jclass catBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/CAT_Table");
 	jmethodID defalutConstrocMID = (*env)->GetMethodID(env, catBeanClass, "<init>", "()V");
-	jmethodID catConstrocMID = (*env)->GetMethodID(env, catBeanClass, "<init>", "(IIIIIIIIIII)V");
-//	jmethodID catConstrocMID = (*env)->GetMethodID(env, catBeanClass, "<init>", "(IIIIIIIIII[Lcom/alex/ts_parser/bean/descriptor;I)V");
+	jmethodID catConstrocMID = (*env)->GetMethodID(env, catBeanClass, "<init>", "(IIIIIIIIII[Lcom/alex/ts_parser/bean/descriptor/Descriptor;I)V");
+
+	jclass descriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/Descriptor");
+	// TODO 对未知描述子的构造
+	// jmethodID descriptorConstrocMID = (*env)->GetMethodID(env, descriptorBeanClass, "<init>", "(II)V");
 
 	FILE *pfTsFile = NULL;
 	char cFilePath[] = "D:\\test\\test_ca.ts";
@@ -56,8 +61,25 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 		return catBean;
 	}
 	PrintCAT(&stCAT);
+
+	int one = 1;
+	int two = 2;
+	int three = 3;
+	int four = 4;
+//	unsigned char a[4] = { 01111110, 01111110, 01111110, 01111110 };
+//	jbyteArray privateDateByteArray = (*env)->NewByteArray(env, 4);
+//	(*env)->SetByteArrayRegion(env, privateDateByteArray, 0, 4, a);
+
+	jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
+	jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIII)V");
+	jobject caDescriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, one, two, three, four);
+
+	jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, 1, descriptorBeanClass, NULL);
+	(*env)->SetObjectArrayElement(env, descriptorBeanArray, 0, caDescriptorBean);
+
 	jobject catBean = (*env)->NewObject(env, catBeanClass, catConstrocMID, stCAT.uiTable_id, stCAT.uiSection_syntax_indicator, stCAT.uiZero, stCAT.uiReserved_first, stCAT.uiSection_length, stCAT.uiReserved_second, stCAT.uiVersion_number,
-			stCAT.uiCurrent_next_indicator, stCAT.uiSection_number, stCAT.uiLast_section_number, stCAT.uiCRC_32); //需要增加参数
+			stCAT.uiCurrent_next_indicator, stCAT.uiSection_number, stCAT.uiLast_section_number, descriptorBeanArray, stCAT.uiCRC_32); //需要增加参数
+//	(*env)->ReleaseByteArrayElements(env, privateDateByteArray, a, JNI_ABORT);
 	fclose(pfTsFile);
 	return catBean;
 }
@@ -129,3 +151,33 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 	return testClass_obj;
 }
 
+/******************************************
+ *
+ * 解析描述流
+ *
+ ******************************************/
+int ParseDescriptor(unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength)
+{
+	int descriptorCount = 0;
+	int iTag = 0;
+	int iDescriptorPosition = 0;
+	CA_DESCRIPTOR_T *pstCA_Descriptor = NULL;
+	do
+	{
+		iTag = GetDescriptorTag(&iTag, iDescriptorPosition, pucDescriptorBuffer, iDescriptorBufferLength);
+		if (-1 == iTag)
+		{
+			LOG("parseDescriptor iTag == -1 \n");
+		}
+		else
+		{
+			pstCA_Descriptor = ParseDescriptorByTag(iTag, iDescriptorPosition, pucDescriptorBuffer, iDescriptorBufferLength);
+			printf("pstCA_Descriptor->uiDescriptor_tag: %d", pstCA_Descriptor->uiDescriptor_tag);
+			iDescriptorPosition += pucDescriptorBuffer[iDescriptorPosition + 1] + 2;
+			descriptorCount++;
+		}
+	}
+	while (iDescriptorPosition < iDescriptorBufferLength);
+
+	return descriptorCount;
+}

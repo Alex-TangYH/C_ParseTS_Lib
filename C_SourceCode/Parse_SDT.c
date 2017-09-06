@@ -118,7 +118,7 @@ void PrintSDT(TS_SDT_T *pstTS_SDT, int iServiceCount)
 		{
 			memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 			sprintf(acOutputPrefix, "SDT.SDT_info[%d].", iServiceLoopTime);
-			ParseDescriptor(pstTS_SDT->stSDT_info[iServiceLoopTime].aucDescriptor, pstTS_SDT->stSDT_info[iServiceLoopTime].uiDescriptor_loop_length, acOutputPrefix);
+			ParseAndPrintDescriptor(pstTS_SDT->stSDT_info[iServiceLoopTime].aucDescriptor, pstTS_SDT->stSDT_info[iServiceLoopTime].uiDescriptor_loop_length, acOutputPrefix);
 		}
 	}
 }

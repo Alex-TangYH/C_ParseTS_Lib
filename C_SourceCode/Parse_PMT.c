@@ -165,7 +165,7 @@ void PrintPMT(TS_PMT_T *pstTS_PMT, int iStreamCount)
 	{
 		memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 		sprintf(acOutputPrefix, "PMT->ProgramDescriptor.");
-		ParseDescriptor(pstTS_PMT->aucProgramDescriptor, pstTS_PMT->uiProgram_info_length, acOutputPrefix);
+		ParseAndPrintDescriptor(pstTS_PMT->aucProgramDescriptor, pstTS_PMT->uiProgram_info_length, acOutputPrefix);
 	}
 	
 	int iLoopTime = 0;
@@ -181,7 +181,7 @@ void PrintPMT(TS_PMT_T *pstTS_PMT, int iStreamCount)
 		{
 			memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 			sprintf(acOutputPrefix, "PMT->PMT_Stream[%d].", iLoopTime);
-			ParseDescriptor(pstTS_PMT->stPMT_Stream[iLoopTime].aucDescriptor, pstTS_PMT->stPMT_Stream[iLoopTime].uiES_info_length, acOutputPrefix);
+			ParseAndPrintDescriptor(pstTS_PMT->stPMT_Stream[iLoopTime].aucDescriptor, pstTS_PMT->stPMT_Stream[iLoopTime].uiES_info_length, acOutputPrefix);
 		}
 	}
 	DUBUGPRINTF("-------------PMT info end-------------\n\n");
