@@ -27,16 +27,16 @@
 #include "C_SourceCode/TestFuction.h"
 #include "C_SourceCode/GetPsiTableInfo.h"
 
-//解析PAT
-JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parsePAT(JNIEnv *env, jclass obj)
+//解析CAT
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseCAT(JNIEnv *env, jclass obj)
 {
-	jclass patBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/PAT_Table");
-	jmethodID patConstrocMID = (*env)->GetMethodID(env, patBeanClass, "<init>", "(IIIIIIIIIII[Lcom/alex/ts_parser/bean/psi/PAT_ProgramInfo;II)V");
-	jclass patInfoBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/PAT_ProgramInfo");
-	jmethodID patInfoConstrocMID = (*env)->GetMethodID(env, patInfoBeanClass, "<init>", "(III)V");
+	jclass catBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/CAT_Table");
+	jmethodID defalutConstrocMID = (*env)->GetMethodID(env, catBeanClass, "<init>", "()V");
+	jmethodID catConstrocMID = (*env)->GetMethodID(env, catBeanClass, "<init>", "(IIIIIIIIIII)V");
+//	jmethodID catConstrocMID = (*env)->GetMethodID(env, catBeanClass, "<init>", "(IIIIIIIIII[Lcom/alex/ts_parser/bean/descriptor;I)V");
 
-	char cFilePath[] = "D:\\test\\test.ts";
 	FILE *pfTsFile = NULL;
+	char cFilePath[] = "D:\\test\\test_ca.ts";
 	pfTsFile = fopen(cFilePath, "rb");
 	if (NULL == pfTsFile)
 	{
@@ -44,20 +44,58 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 		if (NULL == pfTsFile)
 		{
 			DUBUGPRINTF("file does not exist \n");
-			return 0;
+			jobject catBean = (*env)->NewObject(env, catBeanClass, defalutConstrocMID);
+			return catBean;
 		}
 	}
-	int i = 0;
+	TS_CAT_T stCAT = { 0 };
+	int catResult = GetCatTable(pfTsFile, &stCAT);
+	if (catResult != 1)
+	{
+		jobject catBean = (*env)->NewObject(env, catBeanClass, defalutConstrocMID);
+		return catBean;
+	}
+	PrintCAT(&stCAT);
+	jobject catBean = (*env)->NewObject(env, catBeanClass, catConstrocMID, stCAT.uiTable_id, stCAT.uiSection_syntax_indicator, stCAT.uiZero, stCAT.uiReserved_first, stCAT.uiSection_length, stCAT.uiReserved_second, stCAT.uiVersion_number,
+			stCAT.uiCurrent_next_indicator, stCAT.uiSection_number, stCAT.uiLast_section_number, stCAT.uiCRC_32); //需要增加参数
+	fclose(pfTsFile);
+	return catBean;
+}
+
+//解析PAT
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parsePAT(JNIEnv *env, jclass obj)
+{
+	jclass patBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/PAT_Table");
+	jmethodID patConstrocMID = (*env)->GetMethodID(env, patBeanClass, "<init>", "(IIIIIIIIIII[Lcom/alex/ts_parser/bean/psi/PAT_ProgramInfo;II)V");
+	jmethodID defalutConstrocMID = (*env)->GetMethodID(env, patBeanClass, "<init>", "()V");
+	jclass patInfoBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/PAT_ProgramInfo");
+	jmethodID patInfoConstrocMID = (*env)->GetMethodID(env, patInfoBeanClass, "<init>", "(III)V");
+
+	FILE *pfTsFile = NULL;
+	char cFilePath[] = "D:\\test\\test_ca.ts";
+	pfTsFile = fopen(cFilePath, "rb");
+	if (NULL == pfTsFile)
+	{
+		pfTsFile = fopen(cFilePath, "rb");
+		if (NULL == pfTsFile)
+		{
+			DUBUGPRINTF("file does not exist \n");
+			jobject patBean = (*env)->NewObject(env, patBeanClass, defalutConstrocMID);
+			return patBean;
+		}
+	}
+	int iLoopIndex = 0;
 	TS_PAT_T stPat = { 0 };
 	int iProgramCount = GetPatTable(pfTsFile, &stPat);
 	jobjectArray patInfoArray = (*env)->NewObjectArray(env, iProgramCount, patInfoBeanClass, NULL);
-	for (i = 0; i < iProgramCount; i++)
+	for (iLoopIndex = 0; iLoopIndex < iProgramCount; iLoopIndex++)
 	{
-		jobject patinfoBean = (*env)->NewObject(env, patInfoBeanClass, patInfoConstrocMID, stPat.stPAT_Program[i].uiProgram_number, stPat.stPAT_Program[i].uiReserved, stPat.stPAT_Program[i].uiProgram_map_PID);
-		(*env)->SetObjectArrayElement(env, patInfoArray, i, patinfoBean);
+		jobject patinfoBean = (*env)->NewObject(env, patInfoBeanClass, patInfoConstrocMID, stPat.stPAT_Program[iLoopIndex].uiProgram_number, stPat.stPAT_Program[iLoopIndex].uiReserved, stPat.stPAT_Program[iLoopIndex].uiProgram_map_PID);
+		(*env)->SetObjectArrayElement(env, patInfoArray, iLoopIndex, patinfoBean);
 	}
 	jobject patBean = (*env)->NewObject(env, patBeanClass, patConstrocMID, stPat.uiTable_id, stPat.uiSection_syntax_indicator, stPat.uiZero, stPat.uiReserved_first, stPat.uiSection_length, stPat.uiTransport_stream_id, stPat.uiReserved_second,
-			stPat.uiVersion_number, stPat.uiCurrent_next_indicator, stPat.uiSection_number, stPat.uiLast_section_number, patInfoArray, stPat.uiNetwork_PID, stPat.uiCRC_32); //需要增加参数
+			stPat.uiVersion_number, stPat.uiCurrent_next_indicator, stPat.uiSection_number, stPat.uiLast_section_number, patInfoArray, stPat.uiNetwork_PID, stPat.uiCRC_32);
+	fclose(pfTsFile);
 	return patBean;
 }
 

@@ -99,7 +99,8 @@ int ParseTransportStream(FILE *pfTsFile)
 	int iEmmPosition = 0;
 	int iEmmCount = 0;
 
-	TS_PAT_T stPat = { 0 };
+	TS_PAT_T stPAT = { 0 };
+	TS_CAT_T stCAT = { 0 };
 	PAT_INFO_T stPAT_Info[PROGRAM_MAX] = { 0 };
 	PMT_INFO_T stPMT_Info[PROGRAM_MAX] = { 0 };
 	CAT_INFO_T stCAT_Info[CA_SYSTEM_MAX] = { 0 };
@@ -113,7 +114,7 @@ int ParseTransportStream(FILE *pfTsFile)
 	DUBUGPRINTF("The position is %d\n", iTsPosition);
 	DUBUGPRINTF("The package length is %d\n", iTsLength);
 
-	iEmmCount = ParseCAT_Table(pfTsFile, iTsPosition, iTsLength, stCAT_Info);
+	iEmmCount = ParseCAT_Table(pfTsFile, iTsPosition, iTsLength, stCAT_Info, &stCAT);
 	if (-1 == iEmmCount)
 	{
 		DUBUGPRINTF("ParseCAT_Table error \n");
@@ -138,7 +139,7 @@ int ParseTransportStream(FILE *pfTsFile)
 		}
 	}
 
-	iProgramCount = ParsePAT_Table(pfTsFile, iTsPosition, iTsLength, stPAT_Info, &stPat);
+	iProgramCount = ParsePAT_Table(pfTsFile, iTsPosition, iTsLength, stPAT_Info, &stPAT);
 	if (iProgramCount <= 0)
 	{
 		return -1;

@@ -14,8 +14,6 @@
 #define PACKAGE_MAX_LENGTH_204 204
 #define SECTION_MAX_LENGTH_4096 1024*4
 
-#define PRINTFPAT_INFO 1
-
 /******************************************************************
  * 将SectionBuffer的PAT头部信息存入TS_PAT中
  ******************************************************************/

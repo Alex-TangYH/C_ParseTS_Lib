@@ -18,7 +18,7 @@ JNIEXPORT jint JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionM
 /*
  * Class:     com_alex_ts_parser_native_function_NativeFunctionManager
  * Method:    parseAge
- * Signature: ()Lcom/alex/ts_parser/native_function/TestClass;
+ * Signature: ()Lcom/alex/ts_parser/bean/psi/TestClass;
  */
 JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseAge
   (JNIEnv *, jclass);
@@ -29,6 +29,14 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
  * Signature: ()Lcom/alex/ts_parser/bean/psi/PAT_Table;
  */
 JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parsePAT
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     com_alex_ts_parser_native_function_NativeFunctionManager
+ * Method:    parseCAT
+ * Signature: ()Lcom/alex/ts_parser/bean/psi/CAT_Table;
+ */
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseCAT
   (JNIEnv *, jclass);
 
 #ifdef __cplusplus

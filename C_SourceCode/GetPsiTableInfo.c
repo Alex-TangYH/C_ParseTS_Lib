@@ -33,21 +33,33 @@
 #define EIT_EIT_SCHEDULE_TABLE_ID_ONE 0x50
 #define EIT_EIT_SCHEDULE_TABLE_ID_TWO 0x51
 
-int GetPatTable(FILE *pfTsFile, TS_PAT_T *pstPat)
+//获取CAT
+int GetCatTable(FILE *pfTsFile, TS_CAT_T *pstCAT)
 {
 	int iTsPosition = 0;
 	int iTsLength = 0;
-
-	PAT_INFO_T stPAT_Info[PROGRAM_MAX] = { 0 };
-
+	CAT_INFO_T stCAT_Info[CA_SYSTEM_MAX] = { 0 };
 	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
 	if (-1 == iTsLength)
 	{
 		DUBUGPRINTF("The file is not the transport stream file\n");
 		return -1;
 	}
-	int i = ParsePAT_Table(pfTsFile, iTsPosition, iTsLength, stPAT_Info, pstPat);
-	fclose(pfTsFile);
-	return i;
+	return ParseCAT_Table(pfTsFile, iTsPosition, iTsLength, stCAT_Info, pstCAT);
 }
 
+//获取PAT
+int GetPatTable(FILE *pfTsFile, TS_PAT_T *pstPAT)
+{
+	int iTsPosition = 0;
+	int iTsLength = 0;
+	PAT_INFO_T stPAT_Info[PROGRAM_MAX] = { 0 };
+	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
+	if (-1 == iTsLength)
+	{
+		DUBUGPRINTF("The file is not the transport stream file\n");
+		return -1;
+	}
+	int i = ParsePAT_Table(pfTsFile, iTsPosition, iTsLength, stPAT_Info, pstPAT);
+	return i;
+}

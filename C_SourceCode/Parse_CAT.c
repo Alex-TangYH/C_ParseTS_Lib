@@ -15,8 +15,6 @@
 #define SECTION_MAX_LENGTH_4096 1024 * 4
 #define OUTPUT_PREFIX_SIZE 256
 
-#define PRINTFCAT_INFO 1
-
 /******************************************
  *
  * 重置CAT内存
@@ -38,11 +36,11 @@ void ParseCAT_Head(TS_CAT_T *pstTS_CAT, unsigned char *pucSectionBuffer)
 {
 	int iCAT_length = 0;
 	pstTS_CAT->uiTable_id = pucSectionBuffer[0];
-	pstTS_CAT->uiSection_syntax_indicatior = pucSectionBuffer[1] >> 7;
+	pstTS_CAT->uiSection_syntax_indicator = pucSectionBuffer[1] >> 7;
 	pstTS_CAT->uiZero = (pucSectionBuffer[1] >> 6) & 0x01;
-	pstTS_CAT->uiResrved_first = (pucSectionBuffer[1] >> 4) & 0x03;
+	pstTS_CAT->uiReserved_first = (pucSectionBuffer[1] >> 4) & 0x03;
 	pstTS_CAT->uiSection_length = ((pucSectionBuffer[1] & 0x0f) << 8) | pucSectionBuffer[2];
-	pstTS_CAT->uiResrved_second = (pucSectionBuffer[3] << 10) | (pucSectionBuffer[4] << 8) | ((pucSectionBuffer[5] >> 6) & 0x03);
+	pstTS_CAT->uiReserved_second = (pucSectionBuffer[3] << 10) | (pucSectionBuffer[4] << 8) | ((pucSectionBuffer[5] >> 6) & 0x03);
 	pstTS_CAT->uiVersion_number = (pucSectionBuffer[5] >> 1) & 0x1f;
 	pstTS_CAT->uiCurrent_next_indicator = pucSectionBuffer[5] >> 7;
 	pstTS_CAT->uiSection_number = pucSectionBuffer[6];
@@ -80,11 +78,11 @@ void PrintCAT(TS_CAT_T *pstTS_CAT)
 	char acOutputPrefix[OUTPUT_PREFIX_SIZE] = { 0 };
 	DUBUGPRINTF("\n-------------CAT info start-------------\n");
 	DUBUGPRINTF("CAT->Table_id: 0x%02x\n", pstTS_CAT->uiTable_id);
-	DUBUGPRINTF("CAT->Section_syntax_indicatior: 0x%02x\n", pstTS_CAT->uiSection_syntax_indicatior);
+	DUBUGPRINTF("CAT->Section_syntax_indicatior: 0x%02x\n", pstTS_CAT->uiSection_syntax_indicator);
 	DUBUGPRINTF("CAT->Zero: 0x%02x\n", pstTS_CAT->uiZero);
-	DUBUGPRINTF("CAT->Resrved_first: 0x%02x\n", pstTS_CAT->uiResrved_first);
+	DUBUGPRINTF("CAT->Resrved_first: 0x%02x\n", pstTS_CAT->uiReserved_first);
 	DUBUGPRINTF("CAT->Section_length: 0x%02x\n", pstTS_CAT->uiSection_length);
-	DUBUGPRINTF("CAT->Resrved_second: 0x%02x\n", pstTS_CAT->uiResrved_second);
+	DUBUGPRINTF("CAT->Resrved_second: 0x%02x\n", pstTS_CAT->uiReserved_second);
 	DUBUGPRINTF("CAT->Version_number: 0x%02x\n", pstTS_CAT->uiVersion_number);
 	DUBUGPRINTF("CAT->Current_next_indicator: 0x%02x\n", pstTS_CAT->uiCurrent_next_indicator);
 	DUBUGPRINTF("CAT->Section_number: 0x%02x\n", pstTS_CAT->uiSection_number);
@@ -126,15 +124,11 @@ void GetCAT_Info(CA_DESCRIPTOR_T *pstCA_Descriptor, int iDescriptorCount, CAT_IN
  * 解析CAT数据
  *
  ******************************************/
-int ParseCAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, CAT_INFO_T *pstCAT_Info)
+int ParseCAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, CAT_INFO_T *pstCAT_Info, TS_CAT_T *pstTS_CAT)
 {
 	DUBUGPRINTF("\n\n=================================ParseCAT_Table Start================================= \n");
 	int iTemp = 0;
-	TS_CAT_T stTS_CAT = { 0 };
 	int iInfoCount = 0;
-
-//	TODO 多CA信息解析
-//	int iCA_systemCount = 0;
 	unsigned int uiVersion = INITIAL_VERSION;
 	unsigned int uiRecordSectionNumber[SECTION_COUNT_256] = { 0 };
 	unsigned char ucSectionBuffer[SECTION_MAX_LENGTH_4096] = { 0 };
@@ -163,18 +157,19 @@ int ParseCAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, CAT_INFO_T *p
 					if (0 == IsSectionGetBefore(ucSectionBuffer, uiRecordSectionNumber))
 					{
 						DUBUGPRINTF("Enter if (0 == IsSectionGetBefore) in PARSE_CAT\n");
-						ParseCAT_Section(&stTS_CAT, ucSectionBuffer);
+						ParseCAT_Section(pstTS_CAT, ucSectionBuffer);
+						//OPT:提取CA信息
 						//GetCAT_Info(&stTS_CAT, iDescriptorCount, pstCAT_Info, &iInfoCount);
 						if (1 == PRINTFCAT_INFO)
 						{
-							PrintCAT(&stTS_CAT);
+							PrintCAT(pstTS_CAT);
 						}
 					}
 					if (1 == IsAllSectionOver(ucSectionBuffer, uiRecordSectionNumber))
 					{
 						DUBUGPRINTF("Enter if (1 == IsAllSectionOver) in PARSE_CAT\n");
 						DUBUGPRINTF("\n=================================ParseCAT_Table END=================================== \n\n");
-						return iInfoCount;
+						return 1;
 					}
 					else
 					{

@@ -8,6 +8,9 @@
 #ifndef _TSPARSER_H_
 #define _TSPARSER_H_
 
+
+#define PRINTFPAT_INFO 0
+#define PRINTFCAT_INFO 0
 #define DEBUG
 #define LOGPRINTF
 
