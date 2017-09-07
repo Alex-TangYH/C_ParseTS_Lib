@@ -66,20 +66,22 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 	int two = 2;
 	int three = 3;
 	int four = 4;
-//	unsigned char a[4] = { 01111110, 01111110, 01111110, 01111110 };
-//	jbyteArray privateDateByteArray = (*env)->NewByteArray(env, 4);
-//	(*env)->SetByteArrayRegion(env, privateDateByteArray, 0, 4, a);
+	int caTag = 9;
+	unsigned char a[4] = { 0xff, 0xfe, 0x00, 0x0f };
+	unsigned char *b = a;
+	jbyteArray privateDateByteArray = (*env)->NewByteArray(env, 4);
+	(*env)->SetByteArrayRegion(env, privateDateByteArray, 0, four, (jbyte*)b);
 
 	jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
-	jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIII)V");
-	jobject caDescriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, one, two, three, four);
+	jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIII[B)V");
+	jobject caDescriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, caTag, two, three, four,privateDateByteArray);
 
 	jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, 1, descriptorBeanClass, NULL);
 	(*env)->SetObjectArrayElement(env, descriptorBeanArray, 0, caDescriptorBean);
 
 	jobject catBean = (*env)->NewObject(env, catBeanClass, catConstrocMID, stCAT.uiTable_id, stCAT.uiSection_syntax_indicator, stCAT.uiZero, stCAT.uiReserved_first, stCAT.uiSection_length, stCAT.uiReserved_second, stCAT.uiVersion_number,
 			stCAT.uiCurrent_next_indicator, stCAT.uiSection_number, stCAT.uiLast_section_number, descriptorBeanArray, stCAT.uiCRC_32); //需要增加参数
-//	(*env)->ReleaseByteArrayElements(env, privateDateByteArray, a, JNI_ABORT);
+//	(*env)->ReleaseByteArrayElements(env, privateDateByteArray, (jbyte*)b, JNI_ABORT);
 	fclose(pfTsFile);
 	return catBean;
 }
