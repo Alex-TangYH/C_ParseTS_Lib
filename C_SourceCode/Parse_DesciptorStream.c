@@ -4,32 +4,9 @@
 #include "Print_Descriptor.h"
 #include "Parse_DesciptorStream.h"
 #include "TsParser.h"
+#include "DescriptorTag.h"
 
 #define SOURCEFILENAME "Parse_DesciptorStream"
-
-#define VIDEO_STREAM_DESCRIPTOR_TAG 0x02
-#define AUDIO_STREAM_DESCRIPTOR_TAG 0x03
-#define DATA_STREAM_ALIGNMENT_DESCRIPTOR_TAG 0x06
-#define CA_DESCRIPTOR_TAG 0x09
-#define ISO_639_LANGUAGE_DESCRIPTOR_TAG 0x0a
-#define SYSTEM_CLOCK_DESCRIPTOR_TAG 0XB
-#define MAXIMUM_BITRATE_DESCRIPTOR_TAG 0x0e
-
-#define NETWORK_NAME_DESCRIPTOR_TAG 0x40
-#define SERVICE_LIST_DESCRIPTOR_TAG 0x41
-#define SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR_TAG 0x43
-#define CABLE_DELIVERY_SYSTEM_DESCRIPTOR_TAG 0x44
-#define BOUQUET_NAME_DESCRIPTOR_TAG 0x47
-#define SERVICE_DESCRIPTOR_TAG 0x48
-#define LINKAGE_DESCRIPTOR_TAG 0x4a
-#define SHORT_EVENT_DESCRIPTOR_TAG 0x4d
-#define EXTENDED_EVENT_DESCRIPTOR_TAG 0x4e
-#define STREAM_IDENTIFIER_DESCRIPTOR_TAG 0x52
-#define TELETEXT_DESCRIPTOR_TAG 0x56
-#define LOCAL_TIME_OFFSET_DESCRIPTOR_TAG 0x58
-#define SUBTITLING_DESCRIPTOR_TAG 0x59
-#define TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR_TAG 0x5a
-#define FREQUENCY_LIST_DESCRIPTOR_TAG 0x62
 
 /******************************************
  *
@@ -156,111 +133,36 @@ void ParseAndPrintDescriptorByTag(int iTag, int iDescriptorPosition, unsigned ch
 			break;
 	}
 }
-
 /******************************************
  *
- * 解析TAG对应的描述子
+ * 解析标准描述流中描述符的个数
+ * 返回值：
+ * 		-1：最后一段数据超过了描述流的长度
+ * 		其它：描述符的个数
  *
  ******************************************/
-void* ParseDescriptorByTag(int iTag, int iDescriptorPosition, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength)
+int GetDescriptorCountInBuffer(unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength)
 {
-	VIDEO_STREAM_DESCRIPTOR_T stVideoStreamDescriptor = { 0 };
-	NETWORK_NAME_DESCRIPTOR_T stNetworkNameDescriptor = { 0 };
-	AUDIO_STREAM_DESCRIPTOR_T stAudioStreamDescriptor = { 0 };
-	DATA_STREAM_ALIGNMENT_DESCRIPTOR_T stDataStreamAlignmentDescriptor = { 0 };
-	CA_DESCRIPTOR_T stCA_Descriptor = { 0 };
-	ISO_639_LANGUAGE_DESCRIPTOR_T stISO_639_LanguageDescriptor = { 0 };
-	SYSTEM_CLOCK_DESCRIPTOR_T stSystemClockDescriptor = { 0 };
-	MAXIMUM_BITRATE_DESCRIPTOR_T stMaximumBitrateDescriptor = { 0 };
-	SERVICE_LIST_DESCRIPTOR_T stServiceListDescriptor = { 0 };
-	SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR_T stSatelliteDeliverySystemDescriptor = { 0 };
-	CABLE_DELIVERY_SYSTEM_DESCRIPTOR_T stCableDeliverySystemDescriptor = { 0 };
-	BOUQUET_NAME_DESCRIPTOR_T stBouquetNameDescriptor = { 0 };
-	SERVICE_DESCRIPTOR_T stServiceDescriptor = { 0 };
-	LINKAGE_DESCRIPTOR_T stLinkageDescriptor = { 0 };
-	SHORT_EVENT_DESCRIPTOR_T stShortEventDescriptor = { 0 };
-	EXTENDED_EVENT_DESCRIPTOR_T stExtendedEventDescriptor = { 0 };
-	STREAM_IDENTIFIER_DESCRIPTOR_T stStreamIndentifierDescriptor = { 0 };
-	TELETEXT_DESCRIPTOR_T stTeletextDescriptor = { 0 };
-	SUBTITLING_DESCRIPTOR_T stSubtitlingDescriptor = { 0 };
-	LOCAL_TIME_OFFSET_DESCRIPTOR_T stLocalTimeOffsetDescriptor = { 0 };
-	TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR_T stTerrestrialDeliverySystemDescriptor = { 0 };
-	FREQUENCY_LIST_DESCRIPTOR_T stFrequencyListDescriptor = { 0 };
-
-	switch (iTag)
+	int descriptorCount = 0;
+	int iTag = 0;
+	int iDescriptorPosition = 0;
+	do
 	{
-		case VIDEO_STREAM_DESCRIPTOR_TAG:
-			GetVideoStreamDescriptor(&stVideoStreamDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+		iTag = GetDescriptorTag(&iTag, iDescriptorPosition, pucDescriptorBuffer, iDescriptorBufferLength);
+		if (-1 == iTag)
+		{
+			LOG("GetDescriptorCountInBuffer iTag == -1 \n");
 			break;
-		case AUDIO_STREAM_DESCRIPTOR_TAG:
-			GetAudioStreamDescriptor(&stAudioStreamDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case DATA_STREAM_ALIGNMENT_DESCRIPTOR_TAG:
-			GetDataStreamAlignmentDescriptor(&stDataStreamAlignmentDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case CA_DESCRIPTOR_TAG:
-			GetCA_Descriptor(&stCA_Descriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			return &stCA_Descriptor;
-			break;
-		case ISO_639_LANGUAGE_DESCRIPTOR_TAG:
-			GetISO_639_Language_Descriptor(&stISO_639_LanguageDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case SYSTEM_CLOCK_DESCRIPTOR_TAG:
-			GetSystemClockDescriptor(&stSystemClockDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case MAXIMUM_BITRATE_DESCRIPTOR_TAG:
-			GetMaximumBitrateDescriptor(&stMaximumBitrateDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case NETWORK_NAME_DESCRIPTOR_TAG:
-			GetNetworkNameDescriptor(&stNetworkNameDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case SERVICE_LIST_DESCRIPTOR_TAG:
-			GetServiceListDescriptor(&stServiceListDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR_TAG:
-			GetSatelliteDeliverySystemDescriptor(&stSatelliteDeliverySystemDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case CABLE_DELIVERY_SYSTEM_DESCRIPTOR_TAG:
-			GetCableDeliverySystemDescriptor(&stCableDeliverySystemDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case BOUQUET_NAME_DESCRIPTOR_TAG:
-			GetBouquetNameDescriptor(&stBouquetNameDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case SERVICE_DESCRIPTOR_TAG:
-			GetServiceDescriptor(&stServiceDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case LINKAGE_DESCRIPTOR_TAG:
-			GetLinkageDescriptor(&stLinkageDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case SHORT_EVENT_DESCRIPTOR_TAG:
-			GetShortEventDescriptor(&stShortEventDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case EXTENDED_EVENT_DESCRIPTOR_TAG:
-			GetExtendedEventDescriptor(&stExtendedEventDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case STREAM_IDENTIFIER_DESCRIPTOR_TAG:
-			GetStreamIndentifierDescriptor(&stStreamIndentifierDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case TELETEXT_DESCRIPTOR_TAG:
-			GetTeletextDescriptor(&stTeletextDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case LOCAL_TIME_OFFSET_DESCRIPTOR_TAG:
-			GetLocalTimeOffsetDescriptor(&stLocalTimeOffsetDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case SUBTITLING_DESCRIPTOR_TAG:
-			GetSubtitlingDescriptor(&stSubtitlingDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR_TAG:
-			GetTerrestrialDeliverySystemDescriptor(&stTerrestrialDeliverySystemDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		case FREQUENCY_LIST_DESCRIPTOR_TAG:
-			GetFrequencyListDescriptor(&stFrequencyListDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-			break;
-		default:
-			LOG("unKnownTag: %d; iDescriptorPosition: %d\n", iTag, iDescriptorPosition);
-			break;
+		}
+		else
+		{
+			iDescriptorPosition += pucDescriptorBuffer[iDescriptorPosition + 1] + 2;
+			descriptorCount++;
+		}
 	}
-	return &stCA_Descriptor;
+	while (iDescriptorPosition < iDescriptorBufferLength);
+
+	return descriptorCount;
 }
 
 /******************************************
@@ -320,6 +222,7 @@ int ParseAndPrintDescriptor(unsigned char *pucDescriptorBuffer, int iDescriptorB
 		if (-1 == iTag)
 		{
 			LOG("%s ParseDescriptor iTag == -1 \n", SOURCEFILENAME);
+			break;
 		}
 		else
 		{

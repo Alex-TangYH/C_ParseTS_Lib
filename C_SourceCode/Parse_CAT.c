@@ -40,7 +40,7 @@ void ParseCAT_Head(TS_CAT_T *pstTS_CAT, unsigned char *pucSectionBuffer)
 	pstTS_CAT->uiZero = (pucSectionBuffer[1] >> 6) & 0x01;
 	pstTS_CAT->uiReserved_first = (pucSectionBuffer[1] >> 4) & 0x03;
 	pstTS_CAT->uiSection_length = ((pucSectionBuffer[1] & 0x0f) << 8) | pucSectionBuffer[2];
-	pstTS_CAT->uiReserved_second = (pucSectionBuffer[3] << 10) | (pucSectionBuffer[4] << 8) | ((pucSectionBuffer[5] >> 6) & 0x03);
+	pstTS_CAT->uiReserved_second = (pucSectionBuffer[3] << 10) | (pucSectionBuffer[4] << 2) | ((pucSectionBuffer[5] >> 6) & 0x03);
 	pstTS_CAT->uiVersion_number = (pucSectionBuffer[5] >> 1) & 0x1f;
 	pstTS_CAT->uiCurrent_next_indicator = pucSectionBuffer[5] >> 7;
 	pstTS_CAT->uiSection_number = pucSectionBuffer[6];

@@ -3,29 +3,6 @@
 #include "Parse_Descriptor.h"
 #include "Print_Descriptor.h"
 
-#define VIDEO_STREAM_DESCRIPTOR_TAG 0x02
-#define AUDIO_STREAM_DESCRIPTOR_TAG 0x03
-#define DATA_STREAM_ALIGNMENT_DESCRIPTOR_TAG 0x06
-#define CA_DESCRIPTOR_TAG 0x09
-#define ISO_639_LANGUAGE_DESCRIPTOR_TAG 0x10
-#define SYSTEM_CLOCK_DESCRIPTOR_TAG 0XB
-#define MAXIMUM_BITRATE_DESCRIPTOR_TAG 0x0e
-
-#define NETWORK_NAME_DESCRIPTOR_TAG 0x40
-#define SERVICE_LIST_DESCRIPTOR_TAG 0x41
-#define SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR_TAG 0x43
-#define CABLE_DELIVERY_SYSTEM_DESCRIPTOR_TAG 0x44
-#define BOUQUET_NAME_DESCRIPTOR_TAG 0x47
-#define SERVICE_DESCRIPTOR_TAG 0x48
-#define LINKAGE_DESCRIPTOR_TAG 0x4a
-#define SHORT_EVENT_DESCRIPTOR_TAG 0x4d
-#define EXTENDED_EVENT_DESCRIPTOR_TAG 0x4e
-#define STREAM_IDENTIFIER_DESCRIPTOR_TAG 0x52
-#define TELETEXT_DESCRIPTOR_TAG 0x56
-#define SUBTITLING_DESCRIPTOR_TAG 0x59
-#define TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR_TAG 0x5a
-#define FREQUENCY_LIST_DESCRIPTOR_TAG 0x62
-
 /******************************************
  *
  * 解析Network Name Descriptor描述子信息
@@ -143,7 +120,7 @@ int GetSatelliteDeliverySystemDescriptor(SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR_T 
 
 /******************************************
  *
- * 解析Network Name Descriptor描述子信息
+ * 解析Bouquet Name Descriptor描述子信息
  *
  ******************************************/
 int GetBouquetNameDescriptor(BOUQUET_NAME_DESCRIPTOR_T *pstBouquetNameDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition)
@@ -157,7 +134,7 @@ int GetBouquetNameDescriptor(BOUQUET_NAME_DESCRIPTOR_T *pstBouquetNameDescriptor
 
 /******************************************
  *
- * 解析Service   Descriptor描述子信息
+ * 解析Service Descriptor描述子信息
  *
  ******************************************/
 int GetServiceDescriptor(SERVICE_DESCRIPTOR_T *pstServiceDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition)
@@ -187,7 +164,7 @@ int GetServiceDescriptor(SERVICE_DESCRIPTOR_T *pstServiceDescriptor, unsigned ch
 
 /******************************************
  *
- * 解析Link   Descriptor描述子信息
+ * 解析Link Descriptor描述子信息
  *
  ******************************************/
 int GetLinkageDescriptor(LINKAGE_DESCRIPTOR_T *pstLinkageDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition)

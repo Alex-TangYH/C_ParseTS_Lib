@@ -28,7 +28,10 @@
 #include "C_SourceCode/GetPsiTableInfo.h"
 #include "C_SourceCode/Parse_DesciptorStream.h"
 #include "C_SourceCode/Print_Descriptor.h"
+#include "C_SourceCode/DescriptorTag.h"
 
+jbyteArray GetJByteArrayByUChar(JNIEnv *env, unsigned char * pucBuffer, int length);
+int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength);
 //解析CAT
 JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseCAT(JNIEnv *env, jclass obj)
 {
@@ -37,8 +40,6 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 	jmethodID catConstrocMID = (*env)->GetMethodID(env, catBeanClass, "<init>", "(IIIIIIIIII[Lcom/alex/ts_parser/bean/descriptor/Descriptor;I)V");
 
 	jclass descriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/Descriptor");
-	// TODO 对未知描述子的构造
-	// jmethodID descriptorConstrocMID = (*env)->GetMethodID(env, descriptorBeanClass, "<init>", "(II)V");
 
 	FILE *pfTsFile = NULL;
 	char cFilePath[] = "D:\\test\\test_ca.ts";
@@ -60,28 +61,11 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 		jobject catBean = (*env)->NewObject(env, catBeanClass, defalutConstrocMID);
 		return catBean;
 	}
-	PrintCAT(&stCAT);
-
-	int one = 1;
-	int two = 2;
-	int three = 3;
-	int four = 4;
-	int caTag = 9;
-	unsigned char a[4] = { 0xff, 0xfe, 0x00, 0x0f };
-	unsigned char *b = a;
-	jbyteArray privateDateByteArray = (*env)->NewByteArray(env, 4);
-	(*env)->SetByteArrayRegion(env, privateDateByteArray, 0, four, (jbyte*)b);
-
-	jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
-	jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIII[B)V");
-	jobject caDescriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, caTag, two, three, four,privateDateByteArray);
-
-	jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, 1, descriptorBeanClass, NULL);
-	(*env)->SetObjectArrayElement(env, descriptorBeanArray, 0, caDescriptorBean);
-
+	int iDescriptorCount = GetDescriptorCountInBuffer(stCAT.aucDescriptor, stCAT.uiSection_length - 9);
+	jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
+	ParseDescriptorToJArray(env, &descriptorBeanArray, stCAT.aucDescriptor, stCAT.uiSection_length - 9);
 	jobject catBean = (*env)->NewObject(env, catBeanClass, catConstrocMID, stCAT.uiTable_id, stCAT.uiSection_syntax_indicator, stCAT.uiZero, stCAT.uiReserved_first, stCAT.uiSection_length, stCAT.uiReserved_second, stCAT.uiVersion_number,
 			stCAT.uiCurrent_next_indicator, stCAT.uiSection_number, stCAT.uiLast_section_number, descriptorBeanArray, stCAT.uiCRC_32); //需要增加参数
-//	(*env)->ReleaseByteArrayElements(env, privateDateByteArray, (jbyte*)b, JNI_ABORT);
 	fclose(pfTsFile);
 	return catBean;
 }
@@ -123,63 +107,152 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 	return patBean;
 }
 
-//传入文件路径，进行解析
-JNIEXPORT jint JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseTSFileNative(JNIEnv *env, jclass clazz, jstring filePath)
-{
-	const char *str;
-	char pcFilePath[256];
-	str = (*env)->GetStringUTFChars(env, filePath, NULL);
-	strcpy(pcFilePath, str);
-	(*env)->ReleaseStringUTFChars(env, filePath, str);
-	parseStream(pcFilePath);
-	return 1;
-}
-
-//传对象例子
-JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseAge(JNIEnv *env, jclass obj)
-{
-	jclass testClass = (*env)->FindClass(env, "com/alex/ts_parser/native_function/TestClass");
-	jmethodID constrocMID = (*env)->GetMethodID(env, testClass, "<init>", "(IZCFDBSJLjava/lang/String;)V");
-	jstring str = (*env)->NewStringUTF(env, "hwq");
-	unsigned char bl = 0;
-	unsigned short us = 0x47;
-	char c = 0xff;
-	float f = 0x7fffffff;
-	double db = 0x7fffffffffffffff;
-	long l = 0x80000000;
-	long long ll = 0x8fffffffffff;
-	short s = 0xffff;
-	jobject testClass_obj = (*env)->NewObject(env, testClass, constrocMID, l, bl, us, f, db, c, s, ll, str);
-	return testClass_obj;
-}
-
 /******************************************
  *
  * 解析描述流
  *
  ******************************************/
-int ParseDescriptor(unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength)
+int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength)
 {
-	int descriptorCount = 0;
+	VIDEO_STREAM_DESCRIPTOR_T stVideoStreamDescriptor = { 0 };
+	NETWORK_NAME_DESCRIPTOR_T stNetworkNameDescriptor = { 0 };
+	AUDIO_STREAM_DESCRIPTOR_T stAudioStreamDescriptor = { 0 };
+	DATA_STREAM_ALIGNMENT_DESCRIPTOR_T stDataStreamAlignmentDescriptor = { 0 };
+	CA_DESCRIPTOR_T stCA_Descriptor = { 0 };
+	ISO_639_LANGUAGE_DESCRIPTOR_T stISO_639_LanguageDescriptor = { 0 };
+	SYSTEM_CLOCK_DESCRIPTOR_T stSystemClockDescriptor = { 0 };
+	MAXIMUM_BITRATE_DESCRIPTOR_T stMaximumBitrateDescriptor = { 0 };
+	SERVICE_LIST_DESCRIPTOR_T stServiceListDescriptor = { 0 };
+	SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR_T stSatelliteDeliverySystemDescriptor = { 0 };
+	CABLE_DELIVERY_SYSTEM_DESCRIPTOR_T stCableDeliverySystemDescriptor = { 0 };
+	BOUQUET_NAME_DESCRIPTOR_T stBouquetNameDescriptor = { 0 };
+	SERVICE_DESCRIPTOR_T stServiceDescriptor = { 0 };
+	LINKAGE_DESCRIPTOR_T stLinkageDescriptor = { 0 };
+	SHORT_EVENT_DESCRIPTOR_T stShortEventDescriptor = { 0 };
+	EXTENDED_EVENT_DESCRIPTOR_T stExtendedEventDescriptor = { 0 };
+	STREAM_IDENTIFIER_DESCRIPTOR_T stStreamIndentifierDescriptor = { 0 };
+	TELETEXT_DESCRIPTOR_T stTeletextDescriptor = { 0 };
+	SUBTITLING_DESCRIPTOR_T stSubtitlingDescriptor = { 0 };
+	LOCAL_TIME_OFFSET_DESCRIPTOR_T stLocalTimeOffsetDescriptor = { 0 };
+	TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR_T stTerrestrialDeliverySystemDescriptor = { 0 };
+	FREQUENCY_LIST_DESCRIPTOR_T stFrequencyListDescriptor = { 0 };
+
+	int decriptorOrderNumber = 0;
 	int iTag = 0;
 	int iDescriptorPosition = 0;
-	CA_DESCRIPTOR_T *pstCA_Descriptor = NULL;
+
+	jclass descriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/Descriptor");
+	jmethodID descriptorConstrocMID = (*env)->GetMethodID(env, descriptorBeanClass, "<init>", "(II)V");
+
 	do
 	{
 		iTag = GetDescriptorTag(&iTag, iDescriptorPosition, pucDescriptorBuffer, iDescriptorBufferLength);
+		int iLength = pucDescriptorBuffer[1 + iDescriptorPosition];
 		if (-1 == iTag)
 		{
-			LOG("parseDescriptor iTag == -1 \n");
+			LOG("ParseDescriptorToJArray iTag == -1 \n");
+			break;
 		}
 		else
 		{
-			pstCA_Descriptor = ParseDescriptorByTag(iTag, iDescriptorPosition, pucDescriptorBuffer, iDescriptorBufferLength);
-			printf("pstCA_Descriptor->uiDescriptor_tag: %d", pstCA_Descriptor->uiDescriptor_tag);
+			jobject descriptorBean;
+			switch (iTag)
+			{
+				case VIDEO_STREAM_DESCRIPTOR_TAG:
+					GetVideoStreamDescriptor(&stVideoStreamDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case AUDIO_STREAM_DESCRIPTOR_TAG:
+					GetAudioStreamDescriptor(&stAudioStreamDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case DATA_STREAM_ALIGNMENT_DESCRIPTOR_TAG:
+					GetDataStreamAlignmentDescriptor(&stDataStreamAlignmentDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case CA_DESCRIPTOR_TAG:
+					GetCA_Descriptor(&stCA_Descriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
+					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
+					jbyteArray private_data = GetJByteArrayByUChar(env, stCA_Descriptor.aucPrivate_data_byte, stCA_Descriptor.uiDescriptor_length - 4);
+					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag, stCA_Descriptor.uiDescriptor_length, stCA_Descriptor.uiCA_system_ID, stCA_Descriptor.uiReserved,
+							stCA_Descriptor.uiCA_PID, private_data);
+					break;
+				case ISO_639_LANGUAGE_DESCRIPTOR_TAG:
+					GetISO_639_Language_Descriptor(&stISO_639_LanguageDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case SYSTEM_CLOCK_DESCRIPTOR_TAG:
+					GetSystemClockDescriptor(&stSystemClockDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case MAXIMUM_BITRATE_DESCRIPTOR_TAG:
+					GetMaximumBitrateDescriptor(&stMaximumBitrateDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case NETWORK_NAME_DESCRIPTOR_TAG:
+					GetNetworkNameDescriptor(&stNetworkNameDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case SERVICE_LIST_DESCRIPTOR_TAG:
+					GetServiceListDescriptor(&stServiceListDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR_TAG:
+					GetSatelliteDeliverySystemDescriptor(&stSatelliteDeliverySystemDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case CABLE_DELIVERY_SYSTEM_DESCRIPTOR_TAG:
+					GetCableDeliverySystemDescriptor(&stCableDeliverySystemDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case BOUQUET_NAME_DESCRIPTOR_TAG:
+					GetBouquetNameDescriptor(&stBouquetNameDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case SERVICE_DESCRIPTOR_TAG:
+					GetServiceDescriptor(&stServiceDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case LINKAGE_DESCRIPTOR_TAG:
+					GetLinkageDescriptor(&stLinkageDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case SHORT_EVENT_DESCRIPTOR_TAG:
+					GetShortEventDescriptor(&stShortEventDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case EXTENDED_EVENT_DESCRIPTOR_TAG:
+					GetExtendedEventDescriptor(&stExtendedEventDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case STREAM_IDENTIFIER_DESCRIPTOR_TAG:
+					GetStreamIndentifierDescriptor(&stStreamIndentifierDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case TELETEXT_DESCRIPTOR_TAG:
+					GetTeletextDescriptor(&stTeletextDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case LOCAL_TIME_OFFSET_DESCRIPTOR_TAG:
+					GetLocalTimeOffsetDescriptor(&stLocalTimeOffsetDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case SUBTITLING_DESCRIPTOR_TAG:
+					GetSubtitlingDescriptor(&stSubtitlingDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR_TAG:
+					GetTerrestrialDeliverySystemDescriptor(&stTerrestrialDeliverySystemDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				case FREQUENCY_LIST_DESCRIPTOR_TAG:
+					GetFrequencyListDescriptor(&stFrequencyListDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					break;
+				default:
+					descriptorBean = (*env)->NewObject(env, descriptorBeanClass, descriptorConstrocMID, iTag, iLength);
+					LOG("unKnownTag: %d; iDescriptorPosition: %d\n", iTag, iDescriptorPosition);
+					break;
+			}
+			(*env)->SetObjectArrayElement(env, (*pDescriptorBeanArray), decriptorOrderNumber, descriptorBean);
 			iDescriptorPosition += pucDescriptorBuffer[iDescriptorPosition + 1] + 2;
-			descriptorCount++;
+			decriptorOrderNumber++;
 		}
 	}
 	while (iDescriptorPosition < iDescriptorBufferLength);
 
-	return descriptorCount;
+	return 1;
+}
+
+/******************************************
+ *
+ * 字符串转换为jbyteArray
+ *
+ ******************************************/
+jbyteArray GetJByteArrayByUChar(JNIEnv *env, unsigned char * pucBuffer, int length)
+{
+	jbyteArray privateDateByteArray = (*env)->NewByteArray(env, length);
+	(*env)->SetByteArrayRegion(env, privateDateByteArray, 0, length, (jbyte*) pucBuffer);
+	//	TODO 释放内存 (*env)->ReleaseByteArrayElements(env, privateDateByteArray, (jbyte*)b, JNI_ABORT);
+	return privateDateByteArray;
 }
