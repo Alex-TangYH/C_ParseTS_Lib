@@ -60,6 +60,5 @@ int GetPatTable(FILE *pfTsFile, TS_PAT_T *pstPAT)
 		DUBUGPRINTF("The file is not the transport stream file\n");
 		return -1;
 	}
-	int i = ParsePAT_Table(pfTsFile, iTsPosition, iTsLength, stPAT_Info, pstPAT);
-	return i;
+	return ParsePAT_Table(pfTsFile, iTsPosition, iTsLength, stPAT_Info, pstPAT);
 }

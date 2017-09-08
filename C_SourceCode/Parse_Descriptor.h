@@ -100,7 +100,7 @@ typedef struct ISO_639_LANGUAGE_DESCRIPTOR_T
 {
 	unsigned int uiDescriptor_tag :8;
 	unsigned int uiDescriptor_length :8;
-	ISO_639_LANGUAGE_CODE_T stISO_639_Language_code[ISO_639_LANGUAGE_CODE_MAX];
+	ISO_639_LANGUAGE_CODE_T astISO_639_Language_code[ISO_639_LANGUAGE_CODE_MAX];
 	unsigned int uiAudio_type :8;
 } ISO_639_LANGUAGE_DESCRIPTOR_T;
 

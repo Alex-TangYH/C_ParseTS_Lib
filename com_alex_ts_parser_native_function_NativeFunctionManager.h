@@ -26,18 +26,18 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 /*
  * Class:     com_alex_ts_parser_native_function_NativeFunctionManager
  * Method:    parsePAT
- * Signature: ()Lcom/alex/ts_parser/bean/psi/PAT_Table;
+ * Signature: (Ljava/lang/String;)Lcom/alex/ts_parser/bean/psi/PAT_Table;
  */
 JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parsePAT
-  (JNIEnv *, jclass);
+  (JNIEnv *, jclass, jstring);
 
 /*
  * Class:     com_alex_ts_parser_native_function_NativeFunctionManager
  * Method:    parseCAT
- * Signature: ()Lcom/alex/ts_parser/bean/psi/CAT_Table;
+ * Signature: (Ljava/lang/String;)Lcom/alex/ts_parser/bean/psi/CAT_Table;
  */
 JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseCAT
-  (JNIEnv *, jclass);
+  (JNIEnv *, jclass, jstring);
 
 #ifdef __cplusplus
 }

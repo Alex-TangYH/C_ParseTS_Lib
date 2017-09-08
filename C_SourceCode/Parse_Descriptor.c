@@ -586,9 +586,9 @@ int GetISO_639_Language_Descriptor(ISO_639_LANGUAGE_DESCRIPTOR_T *pstISO_639_Lan
 	pstISO_639_LanguageDescriptor->uiDescriptor_length = pucDescriptorBuffer[iDescriptorPosition + 1];
 	for (iDescriptorLength = 0; iDescriptorLength < pstISO_639_LanguageDescriptor->uiDescriptor_length - 1; iDescriptorLength += 3)
 	{
-		pstISO_639_LanguageDescriptor->stISO_639_Language_code[iDescriptorLoopCount].aucPrivate_data_byte[0] = pucDescriptorBuffer[iDescriptorPosition + 2 + (iDescriptorLoopCount * 3)];
-		pstISO_639_LanguageDescriptor->stISO_639_Language_code[iDescriptorLoopCount].aucPrivate_data_byte[1] = pucDescriptorBuffer[iDescriptorPosition + 3 + (iDescriptorLoopCount * 3)];
-		pstISO_639_LanguageDescriptor->stISO_639_Language_code[iDescriptorLoopCount].aucPrivate_data_byte[2] = pucDescriptorBuffer[iDescriptorPosition + 4 + (iDescriptorLoopCount * 3)];
+		pstISO_639_LanguageDescriptor->astISO_639_Language_code[iDescriptorLoopCount].aucPrivate_data_byte[0] = pucDescriptorBuffer[iDescriptorPosition + 2 + (iDescriptorLoopCount * 3)];
+		pstISO_639_LanguageDescriptor->astISO_639_Language_code[iDescriptorLoopCount].aucPrivate_data_byte[1] = pucDescriptorBuffer[iDescriptorPosition + 3 + (iDescriptorLoopCount * 3)];
+		pstISO_639_LanguageDescriptor->astISO_639_Language_code[iDescriptorLoopCount].aucPrivate_data_byte[2] = pucDescriptorBuffer[iDescriptorPosition + 4 + (iDescriptorLoopCount * 3)];
 		iDescriptorLoopCount++;
 	}
 	pstISO_639_LanguageDescriptor->uiAudio_type = pucDescriptorBuffer[iDescriptorPosition + 2 + pstISO_639_LanguageDescriptor->uiDescriptor_length - 1];

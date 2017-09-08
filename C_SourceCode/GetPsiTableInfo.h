@@ -7,7 +7,8 @@
 
 #ifndef GETPSITABLEINFO_H_
 #define GETPSITABLEINFO_H_
-
+#include "Parse_PAT.h"
+#include "Parse_CAT.h"
 
 
 int GetPatTable(FILE *pfTsFile, TS_PAT_T *pstPat);

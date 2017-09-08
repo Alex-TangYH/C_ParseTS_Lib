@@ -380,7 +380,7 @@ void Print_ISO_639_LANGUAGE_DESCRIPTOR(ISO_639_LANGUAGE_DESCRIPTOR_T *pstISO_639
 		
 		for (iDescriptorLength = 0; iDescriptorLength < pstISO_639_LanguageDescriptor->uiDescriptor_length - 1; iDescriptorLength += 3)
 		{
-			DUBUGPRINTF("%s©À©¤ISO_639_LanguageDescriptor.Descriptor_length: %s\n", pacOutputPrefix, pstISO_639_LanguageDescriptor->stISO_639_Language_code[iDescriptorLoopCount].aucPrivate_data_byte);
+			DUBUGPRINTF("%s©À©¤ISO_639_LanguageDescriptor.Descriptor_length: %s\n", pacOutputPrefix, pstISO_639_LanguageDescriptor->astISO_639_Language_code[iDescriptorLoopCount].aucPrivate_data_byte);
 			iDescriptorLoopCount++;
 		}
 		DUBUGPRINTF("%s©¸©¤ISO_639_LanguageDescriptor.Audio_type: 0x%02x\n", pacOutputPrefix, pstISO_639_LanguageDescriptor->uiAudio_type);
