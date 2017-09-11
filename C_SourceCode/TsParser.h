@@ -12,6 +12,7 @@
 #define PRINTFPAT_INFO 0
 #define PRINTFCAT_INFO 0
 #define PRINTFTS_HEAD 0
+#define PRINTFNIT_INFO 1
 //#define DEBUG
 #define LOGPRINTF
 

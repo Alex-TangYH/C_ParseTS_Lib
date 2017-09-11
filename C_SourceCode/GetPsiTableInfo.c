@@ -33,6 +33,26 @@
 #define EIT_EIT_SCHEDULE_TABLE_ID_ONE 0x50
 #define EIT_EIT_SCHEDULE_TABLE_ID_TWO 0x51
 
+//获所有PMT表
+int GetAllPmtTable(FILE *pfTsFile, TS_CAT_T *pstCAT)
+{
+	return 0;
+}
+
+//获取NIT
+int GetNitTable(FILE *pfTsFile, TS_NIT_T *pstNIT,int *piTransportStreamCount)
+{
+	int iTsPosition = 0;
+	int iTsLength = 0;
+	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
+	if (-1 == iTsLength)
+	{
+		DUBUGPRINTF("The file is not the transport stream file\n");
+		return -1;
+	}
+	return ParseNIT_Table(pfTsFile, iTsPosition, iTsLength, pstNIT, piTransportStreamCount);
+}
+
 //获取CAT
 int GetCatTable(FILE *pfTsFile, TS_CAT_T *pstCAT)
 {

@@ -104,6 +104,8 @@ int ParseTransportStream(FILE *pfTsFile)
 	PAT_INFO_T stPAT_Info[PROGRAM_MAX] = { 0 };
 	PMT_INFO_T stPMT_Info[PROGRAM_MAX] = { 0 };
 	CAT_INFO_T stCAT_Info[CA_SYSTEM_MAX] = { 0 };
+	TS_NIT_T stNIT = { 0 };
+	int nitTransportStreamDescriptorCount = 0;
 
 	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
 	if (-1 == iTsLength)
@@ -155,7 +157,7 @@ int ParseTransportStream(FILE *pfTsFile)
 		return -1;
 	}
 
-	if (-1 == ParseNIT_Table(pfTsFile, iTsPosition, iTsLength))
+	if (-1 == ParseNIT_Table(pfTsFile, iTsPosition, iTsLength, &stNIT, &nitTransportStreamDescriptorCount))
 	{
 		return -1;
 	}

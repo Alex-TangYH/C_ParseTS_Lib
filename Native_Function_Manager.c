@@ -37,6 +37,60 @@
 
 /******************************************************
  *
+ * 解析NIT
+ *
+ ******************************************************/
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseNIT(JNIEnv * env, jclass obj, jstring filePath)
+{
+	char cFilePath[1024];
+	String2UnsignedCharArray(env, filePath, cFilePath);
+	FILE *pfTsFile = GetFilePointer(cFilePath);
+	if (pfTsFile == NULL)
+	{
+		return NULL;
+	}
+	else
+	{
+		TS_NIT_T stNIT = { 0 };
+		int iTransportStreamDescriptorCount = 0;
+		int infoIndex = 0;
+		int nitResult = GetNitTable(pfTsFile, &stNIT, &iTransportStreamDescriptorCount);
+		if (nitResult != 1)
+		{
+			LOG("no nit\n");
+			return NULL;
+		}
+		else
+		{
+			jclass nitBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/NIT_Table");
+			jmethodID nitConstrocMID = (*env)->GetMethodID(env, nitBeanClass, "<init>", "(IIIIIIIIIIIII[Lcom/alex/ts_parser/bean/descriptor/Descriptor;II[Lcom/alex/ts_parser/bean/psi/TransportStreamDsecriptor;I)V");
+			jclass descriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/Descriptor");
+			int iDescriptorCount = GetDescriptorCountInBuffer(stNIT.aucDescriptor, stNIT.uiNetwork_descriptor_length);
+			jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
+			ParseDescriptorToJArray(env, &descriptorBeanArray, stNIT.aucDescriptor, stNIT.uiNetwork_descriptor_length);
+			//增加INFO类数组
+			jclass transportDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/TransportStreamDsecriptor");
+			jobjectArray transportDescriptorBeanArray = (*env)->NewObjectArray(env, iTransportStreamDescriptorCount, transportDescriptorBeanClass, NULL);
+			jmethodID transportDescriptorConstrocMID = (*env)->GetMethodID(env, transportDescriptorBeanClass, "<init>", "(IIII[Lcom/alex/ts_parser/bean/descriptor/Descriptor;)V");
+			for (infoIndex = 0; infoIndex < iTransportStreamDescriptorCount; ++infoIndex)
+			{
+				int iDescriptorCount = GetDescriptorCountInBuffer(stNIT.stNIT_stream[infoIndex].aucDescriptor, stNIT.stNIT_stream[infoIndex].uiTransport_descriport_length);
+				jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
+				ParseDescriptorToJArray(env, &descriptorBeanArray, stNIT.stNIT_stream[infoIndex].aucDescriptor, stNIT.stNIT_stream[infoIndex].uiTransport_descriport_length);
+				jobject transportDescriptorBean = (*env)->NewObject(env, transportDescriptorBeanClass, transportDescriptorConstrocMID, stNIT.stNIT_stream[infoIndex].uiTransport_stream_id, stNIT.stNIT_stream[infoIndex].uiOriginal_network_id,
+						stNIT.stNIT_stream[infoIndex].uiReserved_future_use, stNIT.stNIT_stream[infoIndex].uiTransport_descriport_length, descriptorBeanArray);
+				(*env)->SetObjectArrayElement(env, transportDescriptorBeanArray, infoIndex, transportDescriptorBean);
+			}
+			jobject nitBean = (*env)->NewObject(env, nitBeanClass, nitConstrocMID, stNIT.uiTable_id, stNIT.uiSection_syntax_indicator, stNIT.uiReserved_future_use_first, stNIT.uiReserved_first, stNIT.uiSection_length, stNIT.uiNetwork_id,
+					stNIT.uiReserved_second, stNIT.uiVersion_number, stNIT.uiCurrent_next_indicator, stNIT.uiSection_number, stNIT.uiLast_section_number, stNIT.uiReserved_future_use_second, stNIT.uiNetwork_descriptor_length, descriptorBeanArray,
+					stNIT.uiReserved_future_use_third, stNIT.uiTransport_stream_loop_Length, transportDescriptorBeanArray, stNIT.uiCRC_32); //需要增加参数
+			fclose(pfTsFile);
+			return nitBean;
+		}
+	}
+}
+/******************************************************
+ *
  * 解析CAT
  *
  ******************************************************/
@@ -67,7 +121,7 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 			jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
 			ParseDescriptorToJArray(env, &descriptorBeanArray, stCAT.aucDescriptor, stCAT.uiSection_length - 9);
 			jobject catBean = (*env)->NewObject(env, catBeanClass, catConstrocMID, stCAT.uiTable_id, stCAT.uiSection_syntax_indicator, stCAT.uiZero, stCAT.uiReserved_first, stCAT.uiSection_length, stCAT.uiReserved_second, stCAT.uiVersion_number,
-					stCAT.uiCurrent_next_indicator, stCAT.uiSection_number, stCAT.uiLast_section_number, descriptorBeanArray, stCAT.uiCRC_32); //需要增加参数
+					stCAT.uiCurrent_next_indicator, stCAT.uiSection_number, stCAT.uiLast_section_number, descriptorBeanArray, stCAT.uiCRC_32);
 			fclose(pfTsFile);
 			return catBean;
 		}
