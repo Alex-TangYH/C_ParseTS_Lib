@@ -221,6 +221,11 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 		else
 		{
 			jobject descriptorBean;
+			jobject tempObject;
+			jobjectArray tempObjectArray;
+			jbyteArray byteArrayData;
+			int iLoopIndex = 0;
+			int iLoopCount = 0;
 			switch (iTag)
 			{
 				case VIDEO_STREAM_DESCRIPTOR_TAG:
@@ -250,9 +255,9 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 					GetCA_Descriptor(&stCA_Descriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
 					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
 					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
-					jbyteArray private_data = GetJByteArrayByUChar(env, stCA_Descriptor.aucPrivate_data_byte, stCA_Descriptor.uiDescriptor_length - 4);
+					byteArrayData = GetJByteArrayByUChar(env, stCA_Descriptor.aucPrivate_data_byte, stCA_Descriptor.uiDescriptor_length - 4);
 					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag, stCA_Descriptor.uiDescriptor_length, stCA_Descriptor.uiCA_system_ID, stCA_Descriptor.uiReserved,
-							stCA_Descriptor.uiCA_PID, private_data);
+							stCA_Descriptor.uiCA_PID, byteArrayData);
 					break;
 				case ISO_639_LANGUAGE_DESCRIPTOR_TAG:
 					GetISO_639_Language_Descriptor(&stISO_639_LanguageDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
@@ -275,24 +280,37 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 //					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
 //					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
 //					break;
-//				case NETWORK_NAME_DESCRIPTOR_TAG:
-//					GetNetworkNameDescriptor(&stNetworkNameDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-//					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
-//					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
-//					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
-//					break;
-//				case SERVICE_LIST_DESCRIPTOR_TAG:
-//					GetServiceListDescriptor(&stServiceListDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-//					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
-//					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
-//					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
-//					break;
-//				case SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR_TAG:
-//					GetSatelliteDeliverySystemDescriptor(&stSatelliteDeliverySystemDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-//					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
-//					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
-//					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
-//					break;
+				case NETWORK_NAME_DESCRIPTOR_TAG:
+					GetNetworkNameDescriptor(&stNetworkNameDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					jclass networkNameDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/NetworkNameDescriptor");
+					jmethodID networkNameDescriptorConstrocMID = (*env)->GetMethodID(env, networkNameDescriptorBeanClass, "<init>", "(II[B)V");
+					byteArrayData = GetJByteArrayByUChar(env, stNetworkNameDescriptor.aucInfo, stNetworkNameDescriptor.uiDescriptor_length);
+					descriptorBean = (*env)->NewObject(env, networkNameDescriptorBeanClass, networkNameDescriptorConstrocMID, stNetworkNameDescriptor.uiDescriptor_tag, stNetworkNameDescriptor.uiDescriptor_length, byteArrayData);
+					break;
+				case SERVICE_LIST_DESCRIPTOR_TAG:
+					GetServiceListDescriptor(&stServiceListDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					jclass serviceListDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/ServiceListDescriptor");
+					jmethodID serviceListDescriptorConstrocMID = (*env)->GetMethodID(env, serviceListDescriptorBeanClass, "<init>", "(II[Lcom/alex/ts_parser/bean/descriptor/ServiceInfo;)V");
+					jclass serviceInfoBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/ServiceInfo");
+					jmethodID serviceInfoConstrocMID = (*env)->GetMethodID(env, serviceInfoBeanClass, "<init>", "(II)V");
+					iLoopCount = stServiceListDescriptor.uiDescriptor_length / 3;
+					tempObjectArray = (*env)->NewObjectArray(env, iLoopCount, serviceInfoBeanClass, NULL);
+					for (iLoopIndex = 0; iLoopIndex < iLoopCount; iLoopIndex++)
+					{
+						tempObject = (*env)->NewObject(env, serviceInfoBeanClass, serviceInfoConstrocMID, stServiceListDescriptor.astService_info[iLoopIndex].uiServiec_id, stServiceListDescriptor.astService_info[iLoopIndex].uiService_type);
+						(*env)->SetObjectArrayElement(env, tempObjectArray, iLoopIndex, tempObject);
+					}
+					descriptorBean = (*env)->NewObject(env, serviceListDescriptorBeanClass, serviceListDescriptorConstrocMID, stServiceListDescriptor.uiDescriptor_tag, stServiceListDescriptor.uiDescriptor_length, tempObjectArray);
+					break;
+				case SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR_TAG:
+					GetSatelliteDeliverySystemDescriptor(&stSatelliteDeliverySystemDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					jclass satelliteDeliverySystemDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/SatelliteDeliverySystemDescriptor");
+					jmethodID satelliteDeliverySystemDescriptorConstrocMID = (*env)->GetMethodID(env, satelliteDeliverySystemDescriptorBeanClass, "<init>", "(IIIIIIIIIII)V");
+					descriptorBean = (*env)->NewObject(env, satelliteDeliverySystemDescriptorBeanClass, satelliteDeliverySystemDescriptorConstrocMID, stSatelliteDeliverySystemDescriptor.uiDescriptor_tag,
+							stSatelliteDeliverySystemDescriptor.uiDescriptor_length, stSatelliteDeliverySystemDescriptor.uiFrequency, stSatelliteDeliverySystemDescriptor.uiOrbital_position, stSatelliteDeliverySystemDescriptor.uiWest_east_flag,
+							stSatelliteDeliverySystemDescriptor.uiPolarization, stSatelliteDeliverySystemDescriptor.uiRoll_off, stSatelliteDeliverySystemDescriptor.uiModulation_system, stSatelliteDeliverySystemDescriptor.uiModulation_type,
+							stSatelliteDeliverySystemDescriptor.uiSymbol_rate, stSatelliteDeliverySystemDescriptor.uiFEC_inner);
+					break;
 //				case CABLE_DELIVERY_SYSTEM_DESCRIPTOR_TAG:
 //					GetCableDeliverySystemDescriptor(&stCableDeliverySystemDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
 //					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
@@ -353,18 +371,34 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 //					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
 //					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
 //					break;
-//				case TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR_TAG:
-//					GetTerrestrialDeliverySystemDescriptor(&stTerrestrialDeliverySystemDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-//					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
-//					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
-//					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
-//					break;
-//				case FREQUENCY_LIST_DESCRIPTOR_TAG:
-//					GetFrequencyListDescriptor(&stFrequencyListDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-//					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
-//					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
-//					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
-//					break;
+				case TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR_TAG:
+					GetTerrestrialDeliverySystemDescriptor(&stTerrestrialDeliverySystemDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					jclass terrestrialDeliverySystemDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/TerrestrialDeliverySystemDescriptor");
+					jmethodID terrestrialDeliverySystemDescriptorConstrocMID = (*env)->GetMethodID(env, terrestrialDeliverySystemDescriptorBeanClass, "<init>", "(IIIIIIIIIIIIIIII)V");
+					descriptorBean = (*env)->NewObject(env, terrestrialDeliverySystemDescriptorBeanClass, terrestrialDeliverySystemDescriptorConstrocMID, stTerrestrialDeliverySystemDescriptor.uiDescriptor_tag,
+							stTerrestrialDeliverySystemDescriptor.uiDescriptor_length, stTerrestrialDeliverySystemDescriptor.uiCentre_frequency, stTerrestrialDeliverySystemDescriptor.uiBandwidth, stTerrestrialDeliverySystemDescriptor.uiPriority,
+							stTerrestrialDeliverySystemDescriptor.uiTime_Slicing_indicator, stTerrestrialDeliverySystemDescriptor.uiMPE_FEC_indicator, stTerrestrialDeliverySystemDescriptor.uiReserved_future_use_first,
+							stTerrestrialDeliverySystemDescriptor.uiConstellation, stTerrestrialDeliverySystemDescriptor.uiHierarchy_information, stTerrestrialDeliverySystemDescriptor.uiCode_rate_HP_stream,
+							stTerrestrialDeliverySystemDescriptor.uiCode_rate_LP_stream, stTerrestrialDeliverySystemDescriptor.uiGuard_interval, stTerrestrialDeliverySystemDescriptor.uiTransmission_mode,
+							stTerrestrialDeliverySystemDescriptor.uiOther_frequency_flag, stTerrestrialDeliverySystemDescriptor.uiReserved_future_use_second);
+					break;
+				case FREQUENCY_LIST_DESCRIPTOR_TAG:
+					GetFrequencyListDescriptor(&stFrequencyListDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					jclass frequencyListDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/FrequencyListDescriptor");
+					jmethodID frequencyListDescriptorConstrocMID = (*env)->GetMethodID(env, frequencyListDescriptorBeanClass, "<init>", "(IIII[Lcom/alex/ts_parser/bean/descriptor/FrequencyListInfo;)V");
+					jclass frequencyListInfoBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/FrequencyListInfo");
+					jmethodID frequencyListInfoConstrocMID = (*env)->GetMethodID(env, frequencyListInfoBeanClass, "<init>", "(I)V");
+					iLoopCount = (stFrequencyListDescriptor.uiDescriptor_length - 1) / 4;
+					tempObjectArray = (*env)->NewObjectArray(env, iLoopCount, frequencyListInfoBeanClass, NULL);
+					for (iLoopIndex = 0; iLoopIndex < iLoopCount; iLoopIndex++)
+					{
+						tempObject = (*env)->NewObject(env, frequencyListInfoBeanClass, frequencyListInfoConstrocMID, stFrequencyListDescriptor.astCentre_frequency[iLoopIndex].uiCentre_frequency);
+						(*env)->SetObjectArrayElement(env, tempObjectArray, iLoopIndex, tempObject);
+					}
+
+					descriptorBean = (*env)->NewObject(env, frequencyListDescriptorBeanClass, frequencyListDescriptorConstrocMID, stFrequencyListDescriptor.uiDescriptor_tag, stFrequencyListDescriptor.uiDescriptor_length,
+							stFrequencyListDescriptor.uiReserved_future_use, stFrequencyListDescriptor.uiCoding_type, tempObjectArray);
+					break;
 				default:
 					descriptorBean = (*env)->NewObject(env, descriptorBeanClass, descriptorConstrocMID, iTag, iLength);
 					LOG("unKnownTag: %d; iDescriptorPosition: %d\n", iTag, iDescriptorPosition);
@@ -389,7 +423,7 @@ jbyteArray GetJByteArrayByUChar(JNIEnv *env, unsigned char * pucBuffer, int leng
 {
 	jbyteArray privateDateByteArray = (*env)->NewByteArray(env, length);
 	(*env)->SetByteArrayRegion(env, privateDateByteArray, 0, length, (jbyte*) pucBuffer);
-	//	TODO ÊÍ·ÅÄÚ´æ (*env)->ReleaseByteArrayElements(env, privateDateByteArray, (jbyte*)b, JNI_ABORT);
+	(*env)->ReleaseByteArrayElements(env, privateDateByteArray, (jbyte*) pucBuffer, JNI_COMMIT);
 	return privateDateByteArray;
 }
 
