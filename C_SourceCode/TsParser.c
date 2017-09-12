@@ -54,12 +54,13 @@ int ParseAllProgramPMT(FILE *pfTsFile, int iTsPosition, int iTsLength, PAT_INFO_
 	int iProgramIndex = 0;
 	unsigned int uiPMT_PID = 0;
 	PMT_INFO_T stOnePMT_Info = { 0 };
+	TS_PMT_T stTS_PMT = { 0 };
 	DUBUGPRINTF("ParseAllProgramPMT\nProgramCount£º%d\n", iProgramCount);
 
 	for (iProgramIndex = 0; iProgramIndex < iProgramCount; iProgramIndex++)
 	{
 		uiPMT_PID = pstPAT_Info[iProgramIndex].uiPMT_PID;
-		if (-1 == ParsePMT_Table(pfTsFile, iTsPosition, iTsLength, uiPMT_PID, &stOnePMT_Info))
+		if (-1 == ParsePMT_Table(pfTsFile, iTsPosition, iTsLength, uiPMT_PID, &stOnePMT_Info,&stTS_PMT))
 		{
 			DUBUGPRINTF("Parse PMT error, the ProgramIndex is %d, PMT_PID is 0x%0x", iProgramIndex, uiPMT_PID);
 			return -1;

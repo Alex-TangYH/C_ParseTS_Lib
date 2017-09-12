@@ -21,9 +21,9 @@ typedef struct PMT_INFO_T
 typedef struct TS_PMT_STREAM_T
 {
 	unsigned int uiStream_type :8;
-	unsigned int uiReserved_fifth :3;
+	unsigned int uiReserved_first :3;
 	unsigned int uiElementary_PID :13;
-	unsigned int uiReserved_sixth :4;
+	unsigned int uiReserved_second :4;
 	unsigned int uiES_info_length :12;
 	unsigned char aucDescriptor[PMT_DESCRIPTOR_MAX];
 } TS_PMT_STREAM_T;
@@ -46,9 +46,9 @@ typedef struct TS_PMT_T
 	unsigned int uiReserved_fourth :4;
 	unsigned int uiProgram_info_length :12;
 	unsigned char aucProgramDescriptor[PMT_PROGRAM_DESCRIPTOR_MAX];
-	TS_PMT_STREAM_T stPMT_Stream[PMT_DESCRIPTOR_MAX];
+	TS_PMT_STREAM_T astPMT_Stream[PMT_DESCRIPTOR_MAX];
 	unsigned long uiCRC_32 :32;
 } TS_PMT_T;
 
-int ParsePMT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, unsigned int uiPMTPid, PMT_INFO_T *pstPMT_Info);
+int ParsePMT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, unsigned int uiPMTPid, PMT_INFO_T *pstPMT_Info, TS_PMT_T *pstTS_PMT);
 #endif

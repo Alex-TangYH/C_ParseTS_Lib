@@ -37,6 +37,90 @@
 
 /******************************************************
  *
+ * 解析PMT
+ *
+ ******************************************************/
+JNIEXPORT jobjectArray JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parsePMT(JNIEnv * env, jclass obj, jstring filePath, jint pmtCount, jobjectArray pmtInfoArray)
+
+{
+	char *pcFilePath = Jstring2CharPointer(env, filePath);
+	FILE *pfTsFile = GetFilePointer(pcFilePath);
+	if (pfTsFile == NULL)
+	{
+		return NULL;
+	}
+	else
+	{
+		int iLoopIndex = 0;
+		int iPmtCount = pmtCount;
+		TS_PMT_T *pmtArray;
+		pmtArray = (TS_PMT_T *) malloc(pmtCount * sizeof(TS_PMT_T));
+		// 创建C方法获取PMT；
+		TS_PAT_PROGRAM_T *patInfoArray;
+		patInfoArray = (TS_PAT_PROGRAM_T *) malloc(pmtCount * sizeof(TS_PAT_PROGRAM_T));
+		// 将Java类数组转换为C结构体数组
+		jobject patInfoBean;
+		// 获取类的变量get方法
+		jclass patInfoBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/PAT_ProgramInfo");
+		jmethodID patGetProgramMapPidMID = (*env)->GetMethodID(env, patInfoBeanClass, "getProgramMapPID", "()I");
+		jmethodID patGetReservedMID = (*env)->GetMethodID(env, patInfoBeanClass, "getReserved", "()I");
+		jmethodID patGetProgramNumberMID = (*env)->GetMethodID(env, patInfoBeanClass, "getProgramNumber", "()I");
+		// 赋值
+		for (iLoopIndex = 0; iLoopIndex < iPmtCount; iLoopIndex++)
+		{
+			patInfoBean = (*env)->GetObjectArrayElement(env, pmtInfoArray, iLoopIndex);
+			int patProgramNumber = (int) (*env)->CallObjectMethod(env, patInfoBean, patGetProgramNumberMID);
+			int patReserved = (int) (*env)->CallObjectMethod(env, patInfoBean, patGetReservedMID);
+			int patProgramMapPid = (int) (*env)->CallObjectMethod(env, patInfoBean, patGetProgramMapPidMID);
+			patInfoArray[iLoopIndex].uiProgram_number = patProgramNumber;
+			patInfoArray[iLoopIndex].uiProgram_map_PID = patProgramMapPid;
+			patInfoArray[iLoopIndex].uiReserved = patReserved;
+		}
+		GetAllPmtTable(pfTsFile, iPmtCount, patInfoArray, pmtArray);
+		// 获取构造方法和类
+		jclass pmtBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/PMT_Table");
+		jmethodID pmtConstrocMID = (*env)->GetMethodID(env, pmtBeanClass, "<init>", "(IIIIIIIIIIIIIII[Lcom/alex/ts_parser/bean/descriptor/Descriptor;[Lcom/alex/ts_parser/bean/psi/PMT_Stream;I)V");
+		jobjectArray pmtBeanArray = (*env)->NewObjectArray(env, pmtCount, pmtBeanClass, NULL);
+
+		jclass pmtStreamBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/PMT_Stream");
+		jmethodID pmtStreamConstrocMID = (*env)->GetMethodID(env, pmtStreamBeanClass, "<init>", "(IIIII[Lcom/alex/ts_parser/bean/descriptor/Descriptor;)V");
+		jobject pmtStreamBean;
+		for (iLoopIndex = 0; iLoopIndex < iPmtCount; iLoopIndex++)
+		{
+			// 获取描述符
+			jclass descriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/Descriptor");
+			int iDescriptorCount = GetDescriptorCountInBuffer(pmtArray[iLoopIndex].aucProgramDescriptor, pmtArray[iLoopIndex].uiProgram_info_length);
+			jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
+			ParseDescriptorToJArray(env, &descriptorBeanArray, pmtArray[iLoopIndex].aucProgramDescriptor, pmtArray[iLoopIndex].uiProgram_info_length);
+
+			//获取流类
+			jobjectArray pmtStreamArray = (*env)->NewObjectArray(env, 1, pmtStreamBeanClass, NULL);
+			int pmtStreamIndex = 0;
+			for (pmtStreamIndex = 0; pmtStreamIndex < 1; pmtStreamIndex++)
+			{
+				TS_PMT_STREAM_T stPmtStream = pmtArray[iLoopIndex].astPMT_Stream[pmtStreamIndex];
+				int iDescriptorCount = GetDescriptorCountInBuffer(stPmtStream.aucDescriptor, stPmtStream.uiES_info_length);
+				jobjectArray streamDescriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
+				ParseDescriptorToJArray(env, &streamDescriptorBeanArray, stPmtStream.aucDescriptor, stPmtStream.uiES_info_length);
+				pmtStreamBean = (*env)->NewObject(env, pmtStreamBeanClass, pmtStreamConstrocMID, stPmtStream.uiStream_type, stPmtStream.uiReserved_first, stPmtStream.uiElementary_PID, stPmtStream.uiReserved_second, stPmtStream.uiES_info_length,
+						descriptorBeanArray);
+				(*env)->SetObjectArrayElement(env, pmtStreamArray, pmtStreamIndex, pmtStreamBean);
+			}
+
+			jobject pmtBean = (*env)->NewObject(env, pmtBeanClass, pmtConstrocMID, pmtArray[iLoopIndex].uiTable_id, pmtArray[iLoopIndex].uiSection_syntax_indicator, pmtArray[iLoopIndex].uiZero, pmtArray[iLoopIndex].uiReserved_first,
+					pmtArray[iLoopIndex].uiSection_length, pmtArray[iLoopIndex].uiProgram_number, pmtArray[iLoopIndex].uiReserved_second, pmtArray[iLoopIndex].uiVersion_number, pmtArray[iLoopIndex].uiCurrent_next_indicator,
+					pmtArray[iLoopIndex].uiSection_number, pmtArray[iLoopIndex].uiLast_section_number, pmtArray[iLoopIndex].uiReserved_third, pmtArray[iLoopIndex].uiPCR_PID, pmtArray[iLoopIndex].uiReserved_fourth,
+					pmtArray[iLoopIndex].uiProgram_info_length, descriptorBeanArray, pmtStreamArray, pmtArray[iLoopIndex].uiCRC_32);
+			(*env)->SetObjectArrayElement(env, pmtBeanArray, iLoopIndex, pmtBean);
+		}
+		fclose(pfTsFile);
+		// 返回数组
+		return pmtBeanArray;
+	}
+}
+
+/******************************************************
+ *
  * 解析NIT
  *
  ******************************************************/
@@ -475,7 +559,7 @@ FILE* GetFilePointer(char acFilePath[])
 
 /******************************************************
  *
- * String to char array
+ * String to char Pointer
  *
  ******************************************************/
 char* Jstring2CharPointer(JNIEnv *env, jstring filePath)
@@ -485,17 +569,15 @@ char* Jstring2CharPointer(JNIEnv *env, jstring filePath)
 	jmethodID mid = (*env)->GetMethodID(env, clsstring, "getBytes", "(Ljava/lang/String;)[B");
 	jstring strencode = (*env)->NewStringUTF(env, "GB2312");
 	jbyteArray barr = (jbyteArray) (*env)->CallObjectMethod(env, filePath, mid, strencode);
-
 	jbyte* ba = (*env)->GetByteArrayElements(env, barr, JNI_FALSE);
-	jsize alen = (*env)->GetArrayLength(env, barr); //获取长度
-	//jbyteArray转为jbyte*
+	jsize alen = (*env)->GetArrayLength(env, barr);
 	if (alen > 0)
 	{
-		pcFilePath = (char*) malloc(alen + 1);         //"\0"
+		pcFilePath = (char*) malloc(alen + 1);
 		memcpy(pcFilePath, ba, alen);
 		pcFilePath[alen] = 0;
 	}
-	(*env)->ReleaseByteArrayElements(env, barr, ba, 0);  //释放掉
+	(*env)->ReleaseByteArrayElements(env, barr, ba, 0);
 	return pcFilePath;
 }
 

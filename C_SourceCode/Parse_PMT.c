@@ -86,15 +86,15 @@ int ParsePMT_Section(TS_PMT_T *pstTS_PMT, unsigned char *pucSectionBuffer, PMT_C
 	iPMT_Length = 3 + pstTS_PMT->uiSection_length;
 	for (iStreamPosition += pstTS_PMT->uiProgram_info_length; iStreamPosition < iPMT_Length - 4; iStreamPosition += 5)
 	{
-		pstTS_PMT->stPMT_Stream[iStreamCount].uiStream_type = pucSectionBuffer[iStreamPosition];
-		pstTS_PMT->stPMT_Stream[iStreamCount].uiReserved_fifth = pucSectionBuffer[1 + iStreamPosition] >> 5;
-		pstTS_PMT->stPMT_Stream[iStreamCount].uiElementary_PID = ((pucSectionBuffer[1 + iStreamPosition] & 0x1f) << 8) | pucSectionBuffer[2 + iStreamPosition];
-		pstTS_PMT->stPMT_Stream[iStreamCount].uiReserved_sixth = pucSectionBuffer[3 + iStreamPosition] >> 4;
-		pstTS_PMT->stPMT_Stream[iStreamCount].uiES_info_length = ((pucSectionBuffer[3 + iStreamPosition] & 0x0f) << 8) | pucSectionBuffer[4 + iStreamPosition];
-		if (0 != pstTS_PMT->stPMT_Stream[iStreamCount].uiES_info_length)
+		pstTS_PMT->astPMT_Stream[iStreamCount].uiStream_type = pucSectionBuffer[iStreamPosition];
+		pstTS_PMT->astPMT_Stream[iStreamCount].uiReserved_first = pucSectionBuffer[1 + iStreamPosition] >> 5;
+		pstTS_PMT->astPMT_Stream[iStreamCount].uiElementary_PID = ((pucSectionBuffer[1 + iStreamPosition] & 0x1f) << 8) | pucSectionBuffer[2 + iStreamPosition];
+		pstTS_PMT->astPMT_Stream[iStreamCount].uiReserved_second = pucSectionBuffer[3 + iStreamPosition] >> 4;
+		pstTS_PMT->astPMT_Stream[iStreamCount].uiES_info_length = ((pucSectionBuffer[3 + iStreamPosition] & 0x0f) << 8) | pucSectionBuffer[4 + iStreamPosition];
+		if (0 != pstTS_PMT->astPMT_Stream[iStreamCount].uiES_info_length)
 		{
-			memcpy(pstTS_PMT->stPMT_Stream[iStreamCount].aucDescriptor, pucSectionBuffer + 5 + iStreamPosition, pstTS_PMT->stPMT_Stream[iStreamCount].uiES_info_length);
-			iStreamPosition += pstTS_PMT->stPMT_Stream[iStreamCount].uiES_info_length;
+			memcpy(pstTS_PMT->astPMT_Stream[iStreamCount].aucDescriptor, pucSectionBuffer + 5 + iStreamPosition, pstTS_PMT->astPMT_Stream[iStreamCount].uiES_info_length);
+			iStreamPosition += pstTS_PMT->astPMT_Stream[iStreamCount].uiES_info_length;
 		}
 		iStreamCount++;
 	}
@@ -116,8 +116,8 @@ void GetPMT_Info(TS_PMT_T *pstTS_PMT, int iStreamCount, PMT_INFO_T *pstPMT_Info,
 	pstPMT_Info->uiProgramNumber = pstTS_PMT->uiProgram_number;
 	for (iLoopTime = 0; iLoopTime < iStreamCount; ++iLoopTime)
 	{
-		uiStreamType = pstTS_PMT->stPMT_Stream[iLoopTime].uiStream_type;
-		uiElementrayPID = pstTS_PMT->stPMT_Stream[iLoopTime].uiElementary_PID;
+		uiStreamType = pstTS_PMT->astPMT_Stream[iLoopTime].uiStream_type;
+		uiElementrayPID = pstTS_PMT->astPMT_Stream[iLoopTime].uiElementary_PID;
 		/* get audio */
 		if ((0x04 == uiStreamType) || (0x03 == uiStreamType) || (0x0f == uiStreamType) || (0x11 == uiStreamType))
 		{
@@ -172,16 +172,16 @@ void PrintPMT(TS_PMT_T *pstTS_PMT, int iStreamCount)
 	
 	for (iLoopTime = 0; iLoopTime < iStreamCount; ++iLoopTime)
 	{
-		DUBUGPRINTF("PMT->PMT_Stream[%d].Stream_type : 0x%02x \n", iLoopTime, pstTS_PMT->stPMT_Stream[iLoopTime].uiStream_type);
-		DUBUGPRINTF("PMT->PMT_Stream[%d].Reserved_fifth : 0x%02x \n", iLoopTime, pstTS_PMT->stPMT_Stream[iLoopTime].uiReserved_fifth);
-		DUBUGPRINTF("PMT->PMT_Stream[%d].Elementary_PID : 0x%02x \n", iLoopTime, pstTS_PMT->stPMT_Stream[iLoopTime].uiElementary_PID);
-		DUBUGPRINTF("PMT->PMT_Stream[%d].Reserved_sixth : 0x%02x \n", iLoopTime, pstTS_PMT->stPMT_Stream[iLoopTime].uiReserved_sixth);
-		DUBUGPRINTF("PMT->PMT_Stream[%d].ES_info_length : 0x%02x \n", iLoopTime, pstTS_PMT->stPMT_Stream[iLoopTime].uiES_info_length);
-		if (0 != pstTS_PMT->stPMT_Stream[iLoopTime].uiES_info_length)
+		DUBUGPRINTF("PMT->PMT_Stream[%d].Stream_type : 0x%02x \n", iLoopTime, pstTS_PMT->astPMT_Stream[iLoopTime].uiStream_type);
+		DUBUGPRINTF("PMT->PMT_Stream[%d].Reserved_fifth : 0x%02x \n", iLoopTime, pstTS_PMT->astPMT_Stream[iLoopTime].uiReserved_first);
+		DUBUGPRINTF("PMT->PMT_Stream[%d].Elementary_PID : 0x%02x \n", iLoopTime, pstTS_PMT->astPMT_Stream[iLoopTime].uiElementary_PID);
+		DUBUGPRINTF("PMT->PMT_Stream[%d].Reserved_sixth : 0x%02x \n", iLoopTime, pstTS_PMT->astPMT_Stream[iLoopTime].uiReserved_second);
+		DUBUGPRINTF("PMT->PMT_Stream[%d].ES_info_length : 0x%02x \n", iLoopTime, pstTS_PMT->astPMT_Stream[iLoopTime].uiES_info_length);
+		if (0 != pstTS_PMT->astPMT_Stream[iLoopTime].uiES_info_length)
 		{
 			memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 			sprintf(acOutputPrefix, "PMT->PMT_Stream[%d].", iLoopTime);
-			ParseAndPrintDescriptor(pstTS_PMT->stPMT_Stream[iLoopTime].aucDescriptor, pstTS_PMT->stPMT_Stream[iLoopTime].uiES_info_length, acOutputPrefix);
+			ParseAndPrintDescriptor(pstTS_PMT->astPMT_Stream[iLoopTime].aucDescriptor, pstTS_PMT->astPMT_Stream[iLoopTime].uiES_info_length, acOutputPrefix);
 		}
 	}
 	DUBUGPRINTF("-------------PMT info end-------------\n\n");
@@ -206,13 +206,12 @@ int ParseECM(FILE *pfTsFile, int iTsLength, unsigned char *pucSectionBuffer, uns
  *解析单个PMT信息
  *
  ******************************************/
-int ParsePMT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, unsigned int uiPMTPid, PMT_INFO_T *pstPMT_Info)
+int ParsePMT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, unsigned int uiPMTPid, PMT_INFO_T *pstPMT_Info, TS_PMT_T *pstTS_PMT)
 {
 	DUBUGPRINTF("\n\n=================================ParsePMT_Table Start================================= \n");
 	int iTemp = 0;
 	int iAudioCount = 0;
 	int iStreamCount = 0;
-	TS_PMT_T stTS_PMT = { 0 };
 	unsigned int uiVersion = INITIAL_VERSION;
 	unsigned int uiRecordSectionNumber[SECTION_COUNT_256] = { 0 };
 	unsigned char ucSectionBuffer[SECTION_MAX_LENGTH_4096] = { 0 };
@@ -242,12 +241,12 @@ int ParsePMT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, unsigned int 
 				if (0 == IsSectionGetBefore(ucSectionBuffer, uiRecordSectionNumber))
 				{
 					DUBUGPRINTF("Enter if (0 == IsSectionGetBefore) in PARSE_PMT\n");
-					iStreamCount = ParsePMT_Section(&stTS_PMT, ucSectionBuffer, stPMT_CAT_Info);
-					GetPMT_Info(&stTS_PMT, iStreamCount, pstPMT_Info, &iAudioCount);
+					iStreamCount = ParsePMT_Section(pstTS_PMT, ucSectionBuffer, stPMT_CAT_Info);
+					GetPMT_Info(pstTS_PMT, iStreamCount, pstPMT_Info, &iAudioCount);
 					//GetPMT_CAT_Info(pstTS_PMT, iCA_DescriptorCount, pstPMT_CAT_Info);
 					if (1 == PRINTFPMT_INFO)
 					{
-						PrintPMT(&stTS_PMT, iStreamCount);
+						PrintPMT(pstTS_PMT, iStreamCount);
 					}
 
 					//解析ECM

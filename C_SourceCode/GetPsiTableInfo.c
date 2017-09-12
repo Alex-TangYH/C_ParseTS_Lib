@@ -5,7 +5,7 @@
  *      Author: Administrator
  */
 #include <stdio.h>
-
+#include <stdlib.h>
 #include "ParseTS_Length.h"
 
 #include "TsParser.h"
@@ -33,14 +33,30 @@
 #define EIT_EIT_SCHEDULE_TABLE_ID_ONE 0x50
 #define EIT_EIT_SCHEDULE_TABLE_ID_TWO 0x51
 
-//获所有PMT表
-int GetAllPmtTable(FILE *pfTsFile, TS_CAT_T *pstCAT)
+//获取所有PMT表数组
+int GetAllPmtTable(FILE *pfTsFile, int pmtCount, TS_PAT_PROGRAM_T *patInfoArray, TS_PMT_T *pmtArray)
 {
-	return 0;
+	int iTsPosition = 0;
+	int iTsLength = 0;
+	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
+
+	int iProgramIndex = 0;
+	unsigned int uiPMT_PID = 0;
+	PMT_INFO_T stOnePMT_Info = { 0 };
+	for (iProgramIndex = 0; iProgramIndex < pmtCount; iProgramIndex++)
+	{
+		uiPMT_PID = patInfoArray[iProgramIndex].uiProgram_map_PID;
+		if (-1 == ParsePMT_Table(pfTsFile, iTsPosition, iTsLength, uiPMT_PID, &stOnePMT_Info, &pmtArray[iProgramIndex]))
+		{
+			DUBUGPRINTF("Parse PMT error, the ProgramIndex is %d, PMT_PID is 0x%0x", iProgramIndex, uiPMT_PID);
+			return -1;
+		}
+	}
+	return 1;
 }
 
 //获取NIT
-int GetNitTable(FILE *pfTsFile, TS_NIT_T *pstNIT,int *piTransportStreamCount)
+int GetNitTable(FILE *pfTsFile, TS_NIT_T *pstNIT, int *piTransportStreamCount)
 {
 	int iTsPosition = 0;
 	int iTsLength = 0;

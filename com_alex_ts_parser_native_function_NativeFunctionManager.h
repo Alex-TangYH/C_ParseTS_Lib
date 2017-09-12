@@ -50,10 +50,10 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 /*
  * Class:     com_alex_ts_parser_native_function_NativeFunctionManager
  * Method:    parsePMT
- * Signature: (Ljava/lang/String;)[Lcom/alex/ts_parser/bean/psi/PMT_Table;
+ * Signature: (Ljava/lang/String;I[Lcom/alex/ts_parser/bean/psi/PAT_ProgramInfo;)[Lcom/alex/ts_parser/bean/psi/PMT_Table;
  */
 JNIEXPORT jobjectArray JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parsePMT
-  (JNIEnv *, jclass, jstring);
+  (JNIEnv *, jclass, jstring, jint, jobjectArray);
 
 #ifdef __cplusplus
 }
