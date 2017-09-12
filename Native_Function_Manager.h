@@ -13,5 +13,5 @@ jbyteArray GetJByteArrayByUChar(JNIEnv *env, unsigned char * pucBuffer, int leng
 int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength);
 jobject GetISO639LanguageCodeBean(JNIEnv *env, ISO_639_LANGUAGE_CODE_T *pstISO_639_Language_code);
 jobjectArray GetISO639LanguageCodeBeanArray(JNIEnv *env, ISO_639_LANGUAGE_CODE_T astISO_639_Language_CodeArray[], int iso639LanguageCodeCount);
-int String2UnsignedCharArray(JNIEnv *env, jstring filePath, char *pcFilePath);
+char* Jstring2CharPointer(JNIEnv *env, jstring filePath);
 #endif /* NATIVE_FUNCTION_MANAGER_H_ */

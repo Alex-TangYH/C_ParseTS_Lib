@@ -9,7 +9,7 @@
 #include <jni_md.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <stdlib.h>
 #include "com_alex_ts_parser_native_function_NativeFunctionManager.h"
 #include "C_SourceCode/DescriptorTag.h"
 #include "C_SourceCode/GetPsiTableInfo.h"
@@ -42,9 +42,8 @@
  ******************************************************/
 JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseNIT(JNIEnv * env, jclass obj, jstring filePath)
 {
-	char cFilePath[1024];
-	String2UnsignedCharArray(env, filePath, cFilePath);
-	FILE *pfTsFile = GetFilePointer(cFilePath);
+	char *pcFilePath = Jstring2CharPointer(env, filePath);
+	FILE *pfTsFile = GetFilePointer(pcFilePath);
 	if (pfTsFile == NULL)
 	{
 		return NULL;
@@ -96,9 +95,8 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
  ******************************************************/
 JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseCAT(JNIEnv *env, jclass obj, jstring filePath)
 {
-	char cFilePath[1024];
-	String2UnsignedCharArray(env, filePath, cFilePath);
-	FILE *pfTsFile = GetFilePointer(cFilePath);
+	char *pcFilePath = Jstring2CharPointer(env, filePath);
+	FILE *pfTsFile = GetFilePointer(pcFilePath);
 	if (pfTsFile == NULL)
 	{
 		return NULL;
@@ -135,9 +133,9 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
  ******************************************************/
 JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parsePAT(JNIEnv *env, jclass obj, jstring filePath)
 {
-	char cFilePath[1024];
-	String2UnsignedCharArray(env, filePath, cFilePath);
-	FILE *pfTsFile = GetFilePointer(cFilePath);
+	char *pcFilePath = Jstring2CharPointer(env, filePath);
+	FILE *pfTsFile = GetFilePointer(pcFilePath);
+
 	if (pfTsFile == NULL)
 	{
 		return NULL;
@@ -480,12 +478,24 @@ FILE* GetFilePointer(char acFilePath[])
  * String to char array
  *
  ******************************************************/
-int String2UnsignedCharArray(JNIEnv *env, jstring filePath, char pcFilePath[])
+char* Jstring2CharPointer(JNIEnv *env, jstring filePath)
 {
-	const char *str;
-	str = (*env)->GetStringUTFChars(env, filePath, NULL);
-	strcpy(pcFilePath, str);
-	(*env)->ReleaseStringUTFChars(env, filePath, str);
-	return 1;
+	char* pcFilePath = NULL;
+	jclass clsstring = (*env)->FindClass(env, "java/lang/String");
+	jmethodID mid = (*env)->GetMethodID(env, clsstring, "getBytes", "(Ljava/lang/String;)[B");
+	jstring strencode = (*env)->NewStringUTF(env, "GB2312");
+	jbyteArray barr = (jbyteArray) (*env)->CallObjectMethod(env, filePath, mid, strencode);
+
+	jbyte* ba = (*env)->GetByteArrayElements(env, barr, JNI_FALSE);
+	jsize alen = (*env)->GetArrayLength(env, barr); //获取长度
+	//jbyteArray转为jbyte*
+	if (alen > 0)
+	{
+		pcFilePath = (char*) malloc(alen + 1);         //"\0"
+		memcpy(pcFilePath, ba, alen);
+		pcFilePath[alen] = 0;
+	}
+	(*env)->ReleaseByteArrayElements(env, barr, ba, 0);  //释放掉
+	return pcFilePath;
 }
 
