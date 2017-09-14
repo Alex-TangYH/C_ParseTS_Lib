@@ -60,7 +60,7 @@ int ParseAllProgramPMT(FILE *pfTsFile, int iTsPosition, int iTsLength, PAT_INFO_
 	for (iProgramIndex = 0; iProgramIndex < iProgramCount; iProgramIndex++)
 	{
 		uiPMT_PID = pstPAT_Info[iProgramIndex].uiPMT_PID;
-		if (-1 == ParsePMT_Table(pfTsFile, iTsPosition, iTsLength, uiPMT_PID, &stOnePMT_Info,&stTS_PMT))
+		if (-1 == ParsePMT_Table(pfTsFile, iTsPosition, iTsLength, uiPMT_PID, &stOnePMT_Info, &stTS_PMT))
 		{
 			DUBUGPRINTF("Parse PMT error, the ProgramIndex is %d, PMT_PID is 0x%0x", iProgramIndex, uiPMT_PID);
 			return -1;
@@ -106,6 +106,8 @@ int ParseTransportStream(FILE *pfTsFile)
 	PMT_INFO_T stPMT_Info[PROGRAM_MAX] = { 0 };
 	CAT_INFO_T stCAT_Info[CA_SYSTEM_MAX] = { 0 };
 	TS_NIT_T stNIT = { 0 };
+	TS_TDT_T stTS_TDT = { 0 };
+	TS_TOT_T stTS_TOT = { 0 };
 	int nitTransportStreamDescriptorCount = 0;
 
 	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
@@ -163,12 +165,12 @@ int ParseTransportStream(FILE *pfTsFile)
 		return -1;
 	}
 
-	if (-1 == ParseTDT_Table(pfTsFile, iTsPosition, iTsLength))
+	if (-1 == ParseTDT_Table(pfTsFile, iTsPosition, iTsLength, &stTS_TDT))
 	{
 		return -1;
 	}
 
-	if (-1 == ParseTOT_Table(pfTsFile, iTsPosition, iTsLength))
+	if (-1 == ParseTOT_Table(pfTsFile, iTsPosition, iTsLength, &stTS_TOT))
 	{
 		return -1;
 	}
@@ -241,7 +243,7 @@ int parseStream(char *pcFilePath)
  ****************************************************************/
 int main()
 {
-	char cTestFilePath[] = "D:\\test\\test.ts";
+	char cTestFilePath[] = "D:\\test\\test_pat_pmt.ts";
 	parseStream(cTestFilePath);
 	Test();
 	return 1;

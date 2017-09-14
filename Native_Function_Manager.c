@@ -87,7 +87,6 @@ JNIEXPORT jobjectArray JNICALL Java_com_alex_ts_1parser_native_1function_NativeF
 			jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
 			ParseDescriptorToJArray(env, &descriptorBeanArray, pmtArray[iLoopIndex].aucProgramDescriptor, pmtArray[iLoopIndex].uiProgram_info_length);
 
-			// 获取流类
 			int esCount = pmtArray[iLoopIndex].iStreamCount;
 			jobjectArray pmtStreamArray = (*env)->NewObjectArray(env, esCount, pmtStreamBeanClass, NULL);
 			int pmtStreamIndex = 0;
@@ -96,11 +95,11 @@ JNIEXPORT jobjectArray JNICALL Java_com_alex_ts_1parser_native_1function_NativeF
 				TS_PMT_STREAM_T stPmtStream = pmtArray[iLoopIndex].astPMT_Stream[pmtStreamIndex];
 				int iDescriptorCount = GetDescriptorCountInBuffer(stPmtStream.aucDescriptor, stPmtStream.uiES_info_length);
 				jobjectArray streamDescriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
-				// TODO 有些流只要调用这一行就会出错
 				ParseDescriptorToJArray(env, &streamDescriptorBeanArray, stPmtStream.aucDescriptor, stPmtStream.uiES_info_length);
 				pmtStreamBean = (*env)->NewObject(env, pmtStreamBeanClass, pmtStreamConstrocMID, stPmtStream.uiStream_type, stPmtStream.uiReserved_first, stPmtStream.uiElementary_PID, stPmtStream.uiReserved_second, stPmtStream.uiES_info_length,
 						streamDescriptorBeanArray);
 				(*env)->SetObjectArrayElement(env, pmtStreamArray, pmtStreamIndex, pmtStreamBean);
+				(*env)->DeleteLocalRef(env, pmtStreamBean);
 			}
 
 			jobject pmtBean = (*env)->NewObject(env, pmtBeanClass, pmtConstrocMID, pmtArray[iLoopIndex].uiTable_id, pmtArray[iLoopIndex].uiSection_syntax_indicator, pmtArray[iLoopIndex].uiZero, pmtArray[iLoopIndex].uiReserved_first,
@@ -108,6 +107,8 @@ JNIEXPORT jobjectArray JNICALL Java_com_alex_ts_1parser_native_1function_NativeF
 					pmtArray[iLoopIndex].uiSection_number, pmtArray[iLoopIndex].uiLast_section_number, pmtArray[iLoopIndex].uiReserved_third, pmtArray[iLoopIndex].uiPCR_PID, pmtArray[iLoopIndex].uiReserved_fourth,
 					pmtArray[iLoopIndex].uiProgram_info_length, descriptorBeanArray, pmtStreamArray, pmtArray[iLoopIndex].uiCRC_32);
 			(*env)->SetObjectArrayElement(env, pmtBeanArray, iLoopIndex, pmtBean);
+			(*env)->DeleteLocalRef(env, pmtBean);
+			(*env)->DeleteLocalRef(env, descriptorBeanArray);
 		}
 		free(pmtArray);
 		free(patInfoArray);
@@ -255,6 +256,88 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 
 /******************************************
  *
+ * 解析TOT
+ *
+ ******************************************/
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseTOT(JNIEnv *env, jclass obj, jstring filePath)
+{
+	char *pcFilePath = Jstring2CharPointer(env, filePath);
+	FILE *pfTsFile = GetFilePointer(pcFilePath);
+
+	if (pfTsFile == NULL)
+	{
+		return NULL;
+	}
+	else
+	{
+		TS_TOT_T stTot = { 0 };
+		int resultOfGetTable = GetTOTTable(pfTsFile, &stTot);
+		if (-1 == resultOfGetTable)
+		{
+			LOG("no tot\n");
+			return NULL;
+		}
+		else
+		{
+			jclass totBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/si/TOT_Table");
+			jmethodID totConstrocMID = (*env)->GetMethodID(env, totBeanClass, "<init>", "(IIIII[III[Lcom/alex/ts_parser/bean/descriptor/Descriptor;I)V");
+			jintArray jintArray = GetJintArrayFromIntArray(env, stTot.auiUTC_time, 5);
+
+			jclass descriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/Descriptor");
+			int iDescriptorCount = GetDescriptorCountInBuffer(stTot.aucDescriptor, stTot.uiDescriptors_loop_length);
+			jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
+			ParseDescriptorToJArray(env, &descriptorBeanArray, stTot.aucDescriptor, stTot.uiDescriptors_loop_length);
+
+			jobject totBean = (*env)->NewObject(env, totBeanClass, totConstrocMID, stTot.uitable_id, stTot.uiSection_syntax_indicator, stTot.uiReserved_future_use, stTot.uiReserved_first, stTot.uiSection_length, jintArray, stTot.uiReserved_second,
+					stTot.uiDescriptors_loop_length, descriptorBeanArray, stTot.uiCRC_32);
+
+			(*env)->DeleteLocalRef(env, descriptorBeanClass);
+			(*env)->DeleteLocalRef(env, jintArray);
+			(*env)->DeleteLocalRef(env, totBeanClass);
+			(*env)->DeleteLocalRef(env, descriptorBeanArray);
+			return totBean;
+		}
+	}
+}
+
+/******************************************
+ *
+ * 解析TDT
+ *
+ ******************************************/
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseTDT(JNIEnv *env, jclass obj, jstring filePath)
+{
+	char *pcFilePath = Jstring2CharPointer(env, filePath);
+	FILE *pfTsFile = GetFilePointer(pcFilePath);
+
+	if (pfTsFile == NULL)
+	{
+		return NULL;
+	}
+	else
+	{
+		TS_TDT_T stTdt = { 0 };
+		int resultOfGetTable = GetTDTTable(pfTsFile, &stTdt);
+		if (-1 == resultOfGetTable)
+		{
+			LOG("no tdt\n");
+			return NULL;
+		}
+		else
+		{
+			jclass tdtBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/si/TDT_Table");
+			jmethodID tdtConstrocMID = (*env)->GetMethodID(env, tdtBeanClass, "<init>", "(IIIII[I)V");
+			jint intTempArray[5];
+			jintArray jintArray = GetJintArrayFromIntArray(env, stTdt.auiUTC_time, 5);
+			jobject tdtBean = (*env)->NewObject(env, tdtBeanClass, tdtConstrocMID, stTdt.uitable_id, stTdt.uiSection_syntax_indicator, stTdt.uiReserved_future_use, stTdt.uiReserved, stTdt.uiSection_length, jintArray);
+			(*env)->DeleteLocalRef(env, jintArray);
+			return tdtBean;
+		}
+	}
+}
+
+/******************************************
+ *
  * 解析描述流
  *
  ******************************************/
@@ -372,8 +455,7 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 					break;
 				case SERVICE_LIST_DESCRIPTOR_TAG:
 					GetServiceListDescriptor(&stServiceListDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-					jclass serviceListDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/ServiceListDescriptor");
-					jmethodID serviceListDescriptorConstrocMID = (*env)->GetMethodID(env, serviceListDescriptorBeanClass, "<init>", "(II[Lcom/alex/ts_parser/bean/descriptor/ServiceInfo;)V");
+
 					jclass serviceInfoBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/ServiceInfo");
 					jmethodID serviceInfoConstrocMID = (*env)->GetMethodID(env, serviceInfoBeanClass, "<init>", "(II)V");
 					iLoopCount = stServiceListDescriptor.uiDescriptor_length / 3;
@@ -383,6 +465,9 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 						tempObject = (*env)->NewObject(env, serviceInfoBeanClass, serviceInfoConstrocMID, stServiceListDescriptor.astService_info[iLoopIndex].uiServiec_id, stServiceListDescriptor.astService_info[iLoopIndex].uiService_type);
 						(*env)->SetObjectArrayElement(env, tempObjectArray, iLoopIndex, tempObject);
 					}
+
+					jclass serviceListDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/ServiceListDescriptor");
+					jmethodID serviceListDescriptorConstrocMID = (*env)->GetMethodID(env, serviceListDescriptorBeanClass, "<init>", "(II[Lcom/alex/ts_parser/bean/descriptor/ServiceInfo;)V");
 					descriptorBean = (*env)->NewObject(env, serviceListDescriptorBeanClass, serviceListDescriptorConstrocMID, stServiceListDescriptor.uiDescriptor_tag, stServiceListDescriptor.uiDescriptor_length, tempObjectArray);
 					break;
 				case SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR_TAG:
@@ -441,11 +526,9 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 					break;
 				case TELETEXT_DESCRIPTOR_TAG:
 					GetTeletextDescriptor(&stTeletextDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-					jclass teletextDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/TeletextDescriptor");
-					jmethodID teletextDescriptorConstrocMID = (*env)->GetMethodID(env, teletextDescriptorBeanClass, "<init>", "(II[Lcom/alex/ts_parser/bean/descriptor/TeletextInfo;)V");
+
 					jclass teletextInfoBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/TeletextInfo");
 					jmethodID teletextInfoConstrocMID = (*env)->GetMethodID(env, teletextInfoBeanClass, "<init>", "(Lcom/alex/ts_parser/bean/descriptor/ISO_639_LanguageCode;III)V");
-
 					iLoopCount = stTeletextDescriptor.uiDescriptor_length / 5;
 					tempObjectArray = (*env)->NewObjectArray(env, iLoopCount, teletextInfoBeanClass, NULL);
 					for (iLoopIndex = 0; iLoopIndex < iLoopCount; iLoopIndex++)
@@ -455,14 +538,32 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 								stTeletextDescriptor.astTeletext_Info[iLoopIndex].uiTeletext_magazine_number, stTeletextDescriptor.astTeletext_Info[iLoopIndex].uiTeletext_page_number);
 						(*env)->SetObjectArrayElement(env, tempObjectArray, iLoopIndex, tempObject);
 					}
+
+					jclass teletextDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/TeletextDescriptor");
+					jmethodID teletextDescriptorConstrocMID = (*env)->GetMethodID(env, teletextDescriptorBeanClass, "<init>", "(II[Lcom/alex/ts_parser/bean/descriptor/TeletextInfo;)V");
 					descriptorBean = (*env)->NewObject(env, teletextDescriptorBeanClass, teletextDescriptorConstrocMID, stTeletextDescriptor.uiDescriptor_tag, stTeletextDescriptor.uiDescriptor_length, tempObjectArray);
 					break;
-//				case LOCAL_TIME_OFFSET_DESCRIPTOR_TAG:
-//					GetLocalTimeOffsetDescriptor(&stLocalTimeOffsetDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-//					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
-//					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
-//					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
-//					break;
+				case LOCAL_TIME_OFFSET_DESCRIPTOR_TAG:
+					GetLocalTimeOffsetDescriptor(&stLocalTimeOffsetDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+
+					jclass localTimeOffsetInfoClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/LocalTimeOffsetDescriptorInfo");
+					jmethodID localTimeOffsetInfoConstrocMID = (*env)->GetMethodID(env, localTimeOffsetInfoClass, "<init>", "([BIIII[II)V");
+					iLoopCount = stLocalTimeOffsetDescriptor.uiDescriptor_length / 13;
+					tempObjectArray = (*env)->NewObjectArray(env, iLoopCount, localTimeOffsetInfoClass, NULL);
+					for (iLoopIndex = 0; iLoopIndex < iLoopCount; iLoopIndex++)
+					{
+						LOCAL_TIME_OFFSET_INFO_T stLocalTimeOffsetInfo = stLocalTimeOffsetDescriptor.astLocalTimeOffset_Info[iLoopIndex];
+						byteArrayData = GetJByteArrayByUChar(env, stLocalTimeOffsetInfo.uiCountry_code, 3);
+						jintArray jintArray = GetJintArrayFromIntArray(env, stLocalTimeOffsetInfo.auiTime_of_change, 5);
+						tempObject = (*env)->NewObject(env, localTimeOffsetInfoClass, localTimeOffsetInfoConstrocMID, byteArrayData, stLocalTimeOffsetInfo.uiCountry_region_id, stLocalTimeOffsetInfo.uiReserved,
+								stLocalTimeOffsetInfo.uiLocal_time_offset_polarity, stLocalTimeOffsetInfo.uiLocal_time_offset, jintArray, stLocalTimeOffsetInfo.uiNext_time_offset);
+						(*env)->SetObjectArrayElement(env, tempObjectArray, iLoopIndex, tempObject);
+					}
+
+					jclass localTimeOffsetDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/LocalTimeOffsetDescriptor");
+					jmethodID localTimeOffsetDescriptorConstrocMID = (*env)->GetMethodID(env, localTimeOffsetDescriptorBeanClass, "<init>", "(II[Lcom/alex/ts_parser/bean/descriptor/LocalTimeOffsetDescriptorInfo;)V");
+					descriptorBean = (*env)->NewObject(env, localTimeOffsetDescriptorBeanClass, localTimeOffsetDescriptorConstrocMID, stLocalTimeOffsetDescriptor.uiDescriptor_tag, stLocalTimeOffsetDescriptor.uiDescriptor_length, tempObjectArray);
+					break;
 //				case SUBTITLING_DESCRIPTOR_TAG:
 //					GetSubtitlingDescriptor(&stSubtitlingDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
 //					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
@@ -482,8 +583,7 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 					break;
 				case FREQUENCY_LIST_DESCRIPTOR_TAG:
 					GetFrequencyListDescriptor(&stFrequencyListDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-					jclass frequencyListDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/FrequencyListDescriptor");
-					jmethodID frequencyListDescriptorConstrocMID = (*env)->GetMethodID(env, frequencyListDescriptorBeanClass, "<init>", "(IIII[Lcom/alex/ts_parser/bean/descriptor/FrequencyListInfo;)V");
+
 					jclass frequencyListInfoBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/FrequencyListInfo");
 					jmethodID frequencyListInfoConstrocMID = (*env)->GetMethodID(env, frequencyListInfoBeanClass, "<init>", "(I)V");
 					iLoopCount = (stFrequencyListDescriptor.uiDescriptor_length - 1) / 4;
@@ -494,6 +594,8 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 						(*env)->SetObjectArrayElement(env, tempObjectArray, iLoopIndex, tempObject);
 					}
 
+					jclass frequencyListDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/FrequencyListDescriptor");
+					jmethodID frequencyListDescriptorConstrocMID = (*env)->GetMethodID(env, frequencyListDescriptorBeanClass, "<init>", "(IIII[Lcom/alex/ts_parser/bean/descriptor/FrequencyListInfo;)V");
 					descriptorBean = (*env)->NewObject(env, frequencyListDescriptorBeanClass, frequencyListDescriptorConstrocMID, stFrequencyListDescriptor.uiDescriptor_tag, stFrequencyListDescriptor.uiDescriptor_length,
 							stFrequencyListDescriptor.uiReserved_future_use, stFrequencyListDescriptor.uiCoding_type, tempObjectArray);
 					break;
@@ -594,4 +696,21 @@ char* Jstring2CharPointer(JNIEnv *env, jstring filePath)
 	}
 	(*env)->ReleaseByteArrayElements(env, barr, ba, 0);
 	return pcFilePath;
+}
+/******************************************************
+ *
+ * 转换int数组到jint数组
+ *
+ ******************************************************/
+jintArray GetJintArrayFromIntArray(JNIEnv *env, unsigned int intArray[], int iArrayLength)
+{
+	jint intTempArray[iArrayLength];
+	jintArray rtnArray = (*env)->NewIntArray(env, iArrayLength);
+	int iLoopIndex = 0;
+	for (iLoopIndex = 0; iLoopIndex < iArrayLength; iLoopIndex++)
+	{
+		intTempArray[iLoopIndex] = intArray[iLoopIndex];
+	}
+	(*env)->SetIntArrayRegion(env, rtnArray, 0, iArrayLength, intTempArray);
+	return rtnArray;
 }

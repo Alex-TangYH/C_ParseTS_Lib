@@ -519,7 +519,7 @@ void Print_LocalTimeOffsetDescriptor(LOCAL_TIME_OFFSET_DESCRIPTOR_T *pstLocalTim
 			DUBUGPRINTF("%s©À©¤LocalTimeOffsetDescriptor.Subtitling[%d].uiLocal_time_offset_polarity: 0x%02x\n", pacOutputPrefix, iLoopCount, pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].uiLocal_time_offset_polarity);
 			DUBUGPRINTF("%s©À©¤LocalTimeOffsetDescriptor.Subtitling[%d].uiLocal_time_offset: 0x%02x\n", pacOutputPrefix, iLoopCount, pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].uiLocal_time_offset);
 			char acUTC_time[50] = { 0 };
-			FormatUTC_TimeFormMJD(acUTC_time, pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].uiTime_of_change);
+			FormatUTC_TimeFormMJD(acUTC_time, pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].auiTime_of_change);
 			DUBUGPRINTF("%s©À©¤LocalTimeOffsetDescriptor.Subtitling[%d].uiTime_of_change: %s\n", pacOutputPrefix, iLoopCount, acUTC_time);
 			DUBUGPRINTF("%s©¸©¤LocalTimeOffsetDescriptor.Subtitling[%d].uiNext_time_offset: 0x%02x\n", pacOutputPrefix, iLoopCount, pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].uiNext_time_offset);
 		}

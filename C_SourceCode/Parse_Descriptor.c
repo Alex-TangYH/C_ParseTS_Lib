@@ -278,11 +278,11 @@ int GetLocalTimeOffsetDescriptor(LOCAL_TIME_OFFSET_DESCRIPTOR_T *pstLocalTimeOff
 		pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].uiLocal_time_offset_polarity = (pucDescriptorBuffer[iDescriptorPosition + 5 + iLoopCount * iOneInfoLength] << 7) >> 7;
 		pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].uiLocal_time_offset = (pucDescriptorBuffer[iDescriptorPosition + 6 + iLoopCount * iOneInfoLength] << 8)
 				| (pucDescriptorBuffer[iDescriptorPosition + 7 + iLoopCount * iOneInfoLength]);
-		pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].uiTime_of_change[0] = pucDescriptorBuffer[iDescriptorPosition + 8 + iLoopCount * iOneInfoLength];
-		pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].uiTime_of_change[1] = pucDescriptorBuffer[iDescriptorPosition + 9 + iLoopCount * iOneInfoLength];
-		pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].uiTime_of_change[2] = pucDescriptorBuffer[iDescriptorPosition + 10 + iLoopCount * iOneInfoLength];
-		pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].uiTime_of_change[3] = pucDescriptorBuffer[iDescriptorPosition + 11 + iLoopCount * iOneInfoLength];
-		pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].uiTime_of_change[4] = pucDescriptorBuffer[iDescriptorPosition + 12 + iLoopCount * iOneInfoLength];
+		pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].auiTime_of_change[0] = pucDescriptorBuffer[iDescriptorPosition + 8 + iLoopCount * iOneInfoLength];
+		pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].auiTime_of_change[1] = pucDescriptorBuffer[iDescriptorPosition + 9 + iLoopCount * iOneInfoLength];
+		pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].auiTime_of_change[2] = pucDescriptorBuffer[iDescriptorPosition + 10 + iLoopCount * iOneInfoLength];
+		pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].auiTime_of_change[3] = pucDescriptorBuffer[iDescriptorPosition + 11 + iLoopCount * iOneInfoLength];
+		pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].auiTime_of_change[4] = pucDescriptorBuffer[iDescriptorPosition + 12 + iLoopCount * iOneInfoLength];
 		pstLocalTimeOffsetDescriptor->astLocalTimeOffset_Info[iLoopCount].uiNext_time_offset = (pucDescriptorBuffer[iDescriptorPosition + 13 + iLoopCount * iOneInfoLength] << 8)
 				| (pucDescriptorBuffer[iDescriptorPosition + 14 + iLoopCount * iOneInfoLength]);
 	}

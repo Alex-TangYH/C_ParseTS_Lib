@@ -98,3 +98,32 @@ int GetPatTable(FILE *pfTsFile, TS_PAT_T *pstPAT)
 	}
 	return ParsePAT_Table(pfTsFile, iTsPosition, iTsLength, stPAT_Info, pstPAT);
 }
+
+//获取TDT
+int GetTDTTable(FILE *pfTsFile, TS_TDT_T *pstTDT)
+{
+	int iTsPosition = 0;
+	int iTsLength = 0;
+	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
+	if (-1 == iTsLength)
+	{
+		DUBUGPRINTF("The file is not the transport stream file\n");
+		return -1;
+	}
+	return ParseTDT_Table(pfTsFile, iTsPosition, iTsLength, pstTDT);
+}
+
+
+//获取TOT
+int GetTOTTable(FILE *pfTsFile, TS_TOT_T *pstTOT)
+{
+	int iTsPosition = 0;
+	int iTsLength = 0;
+	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
+	if (-1 == iTsLength)
+	{
+		DUBUGPRINTF("The file is not the transport stream file\n");
+		return -1;
+	}
+	return ParseTOT_Table(pfTsFile, iTsPosition, iTsLength, pstTOT);
+}

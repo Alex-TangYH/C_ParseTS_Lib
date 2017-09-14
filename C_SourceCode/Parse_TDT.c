@@ -22,7 +22,7 @@ void ParseTDT_Section(TS_TDT_T *pstTS_TDT, unsigned char *pucSectionBuffer)
 	pstTS_TDT->uiSection_length = ((pucSectionBuffer[1] & 0x0f) << 8) | pucSectionBuffer[2];
 	for (iUTC_timePosition = 0; iUTC_timePosition < 5; iUTC_timePosition++)
 	{
-		pstTS_TDT->uiUTC_time[iUTC_timePosition] = pucSectionBuffer[iUTC_timePosition + 3];
+		pstTS_TDT->auiUTC_time[iUTC_timePosition] = pucSectionBuffer[iUTC_timePosition + 3];
 	}
 }
 
@@ -41,23 +41,23 @@ void PrintTDT(TS_TDT_T *pstTS_TDT)
 	DUBUGPRINTF("TDT->Section_length: 0x%02x\n", pstTS_TDT->uiSection_length);
 	
 	char acUTC_time[20] = { 0 };
-	int iMJD = (pstTS_TDT->uiUTC_time[0] * 16 * 16 + pstTS_TDT->uiUTC_time[1]);
+	int iMJD = (pstTS_TDT->auiUTC_time[0] * 16 * 16 + pstTS_TDT->auiUTC_time[1]);
 	MJDtoUTC(acUTC_time, iMJD);
-	DUBUGPRINTF("TDT->ucUTC_time: %s %02x:%02x:%02x", acUTC_time, pstTS_TDT->uiUTC_time[2], pstTS_TDT->uiUTC_time[3], pstTS_TDT->uiUTC_time[4]);
+	DUBUGPRINTF("TDT->ucUTC_time: %s %02x:%02x:%02x", acUTC_time, pstTS_TDT->auiUTC_time[2], pstTS_TDT->auiUTC_time[3], pstTS_TDT->auiUTC_time[4]);
 	int i = 0;
 	for (i = 0; i < 5; ++i)
 	{
 		if (i == 0)
 		{
-			DUBUGPRINTF("[原始数据：%02x, ", pstTS_TDT->uiUTC_time[i]);
+			DUBUGPRINTF("[原始数据：%02x, ", pstTS_TDT->auiUTC_time[i]);
 		}
 		else if (i < 5 - 1)
 		{
-			DUBUGPRINTF("%02x, ", pstTS_TDT->uiUTC_time[i]);
+			DUBUGPRINTF("%02x, ", pstTS_TDT->auiUTC_time[i]);
 		}
 		else
 		{
-			DUBUGPRINTF("%02x] \n", pstTS_TDT->uiUTC_time[i]);
+			DUBUGPRINTF("%02x] \n", pstTS_TDT->auiUTC_time[i]);
 		}
 		
 	}
@@ -69,11 +69,10 @@ void PrintTDT(TS_TDT_T *pstTS_TDT)
  *从流中解析TDT信息
  *
  ******************************************/
-int ParseTDT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
+int ParseTDT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_TDT_T *pstTS_TDT)
 {
 	DUBUGPRINTF("\n\n=================================ParseTDT_Table Start================================= \n");
 	int iTemp = 0;
-	TS_TDT_T stTS_TDT = { 0 };
 	unsigned int uiVersion = INITIAL_VERSION;
 	unsigned char ucSectionBuffer[SECTION_MAX_LENGTH_4092] = { 0 };
 	unsigned int uiRecordGetSection[SECTION_COUNT_256] = { 0 };
@@ -95,8 +94,10 @@ int ParseTDT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 				fseek(pfTsFile, 0 - iTsLength, SEEK_CUR);
 				break;
 			case 1:
-				ParseTDT_Section(&stTS_TDT, ucSectionBuffer);
-				PrintTDT(&stTS_TDT);
+				ParseTDT_Section(pstTS_TDT, ucSectionBuffer);
+				if (1 == PRINTFTDT_INFO){
+					PrintTDT(pstTS_TDT);
+				}
 				DUBUGPRINTF("\n=================================ParseTDT_Table END=================================== \n\n");
 				return 1;
 				break;

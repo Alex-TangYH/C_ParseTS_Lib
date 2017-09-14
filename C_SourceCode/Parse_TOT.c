@@ -26,7 +26,7 @@ void ParseTOT_Section(TS_TOT_T *pstTS_TOT, unsigned char *pucSectionBuffer)
 	
 	for (iUTC_timePosition = 0; iUTC_timePosition < 5; iUTC_timePosition++)
 	{
-		pstTS_TOT->uiUTC_time[iUTC_timePosition] = pucSectionBuffer[iUTC_timePosition + 3];
+		pstTS_TOT->auiUTC_time[iUTC_timePosition] = pucSectionBuffer[iUTC_timePosition + 3];
 	}
 	pstTS_TOT->uiReserved_second = pucSectionBuffer[8] >> 4;
 	pstTS_TOT->uiDescriptors_loop_length = ((pucSectionBuffer[8] & 0x0f) << 8) | pucSectionBuffer[9];
@@ -47,7 +47,7 @@ void PrintTOT(TS_TOT_T *pstTS_TOT)
 	DUBUGPRINTF("TOT->Section_length: 0x%02x\n", pstTS_TOT->uiSection_length);
 	
 	char acUTC_time[50] = { 0 };
-	FormatUTC_TimeFormMJD(acUTC_time, pstTS_TOT->uiUTC_time);
+	FormatUTC_TimeFormMJD(acUTC_time, pstTS_TOT->auiUTC_time);
 	DUBUGPRINTF("TOT->UTC_time: %s\n", acUTC_time);
 	DUBUGPRINTF("TOT->Reserved_second: 0x%02x\n", pstTS_TOT->uiReserved_second);
 	DUBUGPRINTF("TOT->Descriptors_loop_length: 0x%02x\n", pstTS_TOT->uiDescriptors_loop_length);
@@ -64,11 +64,10 @@ void PrintTOT(TS_TOT_T *pstTS_TOT)
 	DUBUGPRINTF("\n-------------TOT info end-------------\n");
 }
 
-int ParseTOT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
+int ParseTOT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_TOT_T *pstTS_TOT)
 {
 	DUBUGPRINTF("\n\n=================================ParseTOT_Table Start================================= \n");
 	int iTemp = 0;
-	TS_TOT_T stTS_TOT = { 0 };
 	unsigned int uiVersion = INITIAL_VERSION;
 	unsigned char ucSectionBuffer[SECTION_MAX_LENGTH_4092] = { 0 };
 	unsigned int uiRecordGetSection[SECTION_COUNT_256] = { 0 };
@@ -92,8 +91,11 @@ int ParseTOT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 			case 1:
 				if (0 == IsSectionGetBefore(ucSectionBuffer, uiRecordGetSection))
 				{
-					ParseTOT_Section(&stTS_TOT, ucSectionBuffer);
-					PrintTOT(&stTS_TOT);
+					ParseTOT_Section(pstTS_TOT, ucSectionBuffer);
+					if (1 == PRINTFTOT_INFO)
+					{
+						PrintTOT(pstTS_TOT);
+					}
 					DUBUGPRINTF("\n=================================ParseTOT_Table END=================================== \n\n");
 					return 1;
 				}

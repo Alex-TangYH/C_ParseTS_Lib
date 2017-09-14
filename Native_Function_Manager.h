@@ -14,4 +14,5 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 jobject GetISO639LanguageCodeBean(JNIEnv *env, ISO_639_LANGUAGE_CODE_T *pstISO_639_Language_code);
 jobjectArray GetISO639LanguageCodeBeanArray(JNIEnv *env, ISO_639_LANGUAGE_CODE_T astISO_639_Language_CodeArray[], int iso639LanguageCodeCount);
 char* Jstring2CharPointer(JNIEnv *env, jstring filePath);
+jintArray GetJintArrayFromIntArray(JNIEnv *env, unsigned int intArray[],int iArrayLength);
 #endif /* NATIVE_FUNCTION_MANAGER_H_ */

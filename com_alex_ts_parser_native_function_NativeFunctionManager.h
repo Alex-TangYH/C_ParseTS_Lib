@@ -55,6 +55,22 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 JNIEXPORT jobjectArray JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parsePMT
   (JNIEnv *, jclass, jstring, jint, jobjectArray);
 
+/*
+ * Class:     com_alex_ts_parser_native_function_NativeFunctionManager
+ * Method:    parseTOT
+ * Signature: (Ljava/lang/String;)Lcom/alex/ts_parser/bean/si/TOT_Table;
+ */
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseTOT
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     com_alex_ts_parser_native_function_NativeFunctionManager
+ * Method:    parseTDT
+ * Signature: (Ljava/lang/String;)Lcom/alex/ts_parser/bean/si/TDT_Table;
+ */
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseTDT
+  (JNIEnv *, jclass, jstring);
+
 #ifdef __cplusplus
 }
 #endif

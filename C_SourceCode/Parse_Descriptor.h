@@ -252,7 +252,7 @@ typedef struct LOCAL_TIME_OFFSET_INFO_T
 	unsigned int uiReserved :1;
 	unsigned int uiLocal_time_offset_polarity :1;
 	unsigned int uiLocal_time_offset :16;
-	unsigned int uiTime_of_change[5];
+	unsigned int auiTime_of_change[5];
 	unsigned int uiNext_time_offset :16;
 } LOCAL_TIME_OFFSET_INFO_T;
 

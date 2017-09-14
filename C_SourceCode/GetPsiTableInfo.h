@@ -11,7 +11,11 @@
 #include "Parse_CAT.h"
 #include "Parse_NIT.h"
 #include "Parse_PMT.h"
+#include "Parse_TDT.h"
+#include "Parse_TOT.h"
 
+int GetTOTTable(FILE *pfTsFile, TS_TOT_T *pstTOT);
+int GetTDTTable(FILE *pfTsFile, TS_TDT_T *pstTDT);
 int GetPatTable(FILE *pfTsFile, TS_PAT_T *pstPat);
 int GetCatTable(FILE *pfTsFile, TS_CAT_T *pstCAT);
 int GetNitTable(FILE *pfTsFile, TS_NIT_T *pstNIT,int *piTransportStreamCount);
