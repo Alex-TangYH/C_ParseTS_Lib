@@ -9,11 +9,12 @@
 #define _TSPARSER_H_
 
 
+#define DEBUG
 #define PRINTFPAT_INFO 0
 #define PRINTFCAT_INFO 0
 #define PRINTFTS_HEAD 0
-#define PRINTFNIT_INFO 1
-//#define DEBUG
+#define PRINTFNIT_INFO 0
+#define PRINTFPMT_INFO 0
 #define LOGPRINTF
 
 #ifdef DEBUG

@@ -48,6 +48,7 @@ typedef struct TS_PMT_T
 	unsigned char aucProgramDescriptor[PMT_PROGRAM_DESCRIPTOR_MAX];
 	TS_PMT_STREAM_T astPMT_Stream[PMT_DESCRIPTOR_MAX];
 	unsigned long uiCRC_32 :32;
+	int iStreamCount;
 } TS_PMT_T;
 
 int ParsePMT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, unsigned int uiPMTPid, PMT_INFO_T *pstPMT_Info, TS_PMT_T *pstTS_PMT);

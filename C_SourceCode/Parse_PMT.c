@@ -13,8 +13,6 @@
 #define SECTION_MAX_LENGTH_4096 1024*4
 #define OUTPUT_PREFIX_SIZE 256
 
-#define PRINTFPMT_INFO 1
-
 /******************************************
  *
  *重置PMT的section信息
@@ -98,7 +96,7 @@ int ParsePMT_Section(TS_PMT_T *pstTS_PMT, unsigned char *pucSectionBuffer, PMT_C
 		}
 		iStreamCount++;
 	}
-	
+	pstTS_PMT->iStreamCount = iStreamCount;
 	return iStreamCount;
 }
 

@@ -54,18 +54,14 @@ JNIEXPORT jobjectArray JNICALL Java_com_alex_ts_1parser_native_1function_NativeF
 		int iLoopIndex = 0;
 		int iPmtCount = pmtCount;
 		TS_PMT_T *pmtArray;
-		pmtArray = (TS_PMT_T *) malloc(pmtCount * sizeof(TS_PMT_T));
-		// 创建C方法获取PMT；
+		pmtArray = (TS_PMT_T *) malloc(iPmtCount * sizeof(TS_PMT_T));
 		TS_PAT_PROGRAM_T *patInfoArray;
-		patInfoArray = (TS_PAT_PROGRAM_T *) malloc(pmtCount * sizeof(TS_PAT_PROGRAM_T));
-		// 将Java类数组转换为C结构体数组
+		patInfoArray = (TS_PAT_PROGRAM_T *) malloc(iPmtCount * sizeof(TS_PAT_PROGRAM_T));
 		jobject patInfoBean;
-		// 获取类的变量get方法
 		jclass patInfoBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/PAT_ProgramInfo");
 		jmethodID patGetProgramMapPidMID = (*env)->GetMethodID(env, patInfoBeanClass, "getProgramMapPID", "()I");
 		jmethodID patGetReservedMID = (*env)->GetMethodID(env, patInfoBeanClass, "getReserved", "()I");
 		jmethodID patGetProgramNumberMID = (*env)->GetMethodID(env, patInfoBeanClass, "getProgramNumber", "()I");
-		// 赋值
 		for (iLoopIndex = 0; iLoopIndex < iPmtCount; iLoopIndex++)
 		{
 			patInfoBean = (*env)->GetObjectArrayElement(env, pmtInfoArray, iLoopIndex);
@@ -77,7 +73,6 @@ JNIEXPORT jobjectArray JNICALL Java_com_alex_ts_1parser_native_1function_NativeF
 			patInfoArray[iLoopIndex].uiReserved = patReserved;
 		}
 		GetAllPmtTable(pfTsFile, iPmtCount, patInfoArray, pmtArray);
-		// 获取构造方法和类
 		jclass pmtBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/psi/PMT_Table");
 		jmethodID pmtConstrocMID = (*env)->GetMethodID(env, pmtBeanClass, "<init>", "(IIIIIIIIIIIIIII[Lcom/alex/ts_parser/bean/descriptor/Descriptor;[Lcom/alex/ts_parser/bean/psi/PMT_Stream;I)V");
 		jobjectArray pmtBeanArray = (*env)->NewObjectArray(env, pmtCount, pmtBeanClass, NULL);
@@ -87,23 +82,24 @@ JNIEXPORT jobjectArray JNICALL Java_com_alex_ts_1parser_native_1function_NativeF
 		jobject pmtStreamBean;
 		for (iLoopIndex = 0; iLoopIndex < iPmtCount; iLoopIndex++)
 		{
-			// 获取描述符
 			jclass descriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/Descriptor");
 			int iDescriptorCount = GetDescriptorCountInBuffer(pmtArray[iLoopIndex].aucProgramDescriptor, pmtArray[iLoopIndex].uiProgram_info_length);
 			jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
 			ParseDescriptorToJArray(env, &descriptorBeanArray, pmtArray[iLoopIndex].aucProgramDescriptor, pmtArray[iLoopIndex].uiProgram_info_length);
 
-			//获取流类
-			jobjectArray pmtStreamArray = (*env)->NewObjectArray(env, 1, pmtStreamBeanClass, NULL);
+			// 获取流类
+			int esCount = pmtArray[iLoopIndex].iStreamCount;
+			jobjectArray pmtStreamArray = (*env)->NewObjectArray(env, esCount, pmtStreamBeanClass, NULL);
 			int pmtStreamIndex = 0;
-			for (pmtStreamIndex = 0; pmtStreamIndex < 1; pmtStreamIndex++)
+			for (pmtStreamIndex = 0; pmtStreamIndex < esCount; pmtStreamIndex++)
 			{
 				TS_PMT_STREAM_T stPmtStream = pmtArray[iLoopIndex].astPMT_Stream[pmtStreamIndex];
 				int iDescriptorCount = GetDescriptorCountInBuffer(stPmtStream.aucDescriptor, stPmtStream.uiES_info_length);
 				jobjectArray streamDescriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
+				// TODO 有些流只要调用这一行就会出错
 				ParseDescriptorToJArray(env, &streamDescriptorBeanArray, stPmtStream.aucDescriptor, stPmtStream.uiES_info_length);
 				pmtStreamBean = (*env)->NewObject(env, pmtStreamBeanClass, pmtStreamConstrocMID, stPmtStream.uiStream_type, stPmtStream.uiReserved_first, stPmtStream.uiElementary_PID, stPmtStream.uiReserved_second, stPmtStream.uiES_info_length,
-						descriptorBeanArray);
+						streamDescriptorBeanArray);
 				(*env)->SetObjectArrayElement(env, pmtStreamArray, pmtStreamIndex, pmtStreamBean);
 			}
 
@@ -113,8 +109,11 @@ JNIEXPORT jobjectArray JNICALL Java_com_alex_ts_1parser_native_1function_NativeF
 					pmtArray[iLoopIndex].uiProgram_info_length, descriptorBeanArray, pmtStreamArray, pmtArray[iLoopIndex].uiCRC_32);
 			(*env)->SetObjectArrayElement(env, pmtBeanArray, iLoopIndex, pmtBean);
 		}
+		free(pmtArray);
+		free(patInfoArray);
+		pmtArray = NULL;
+		patInfoArray = NULL;
 		fclose(pfTsFile);
-		// 返回数组
 		return pmtBeanArray;
 	}
 }
@@ -290,7 +289,6 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 
 	jclass descriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/Descriptor");
 	jmethodID descriptorConstrocMID = (*env)->GetMethodID(env, descriptorBeanClass, "<init>", "(II)V");
-
 	do
 	{
 		iTag = GetDescriptorTag(&iTag, iDescriptorPosition, pucDescriptorBuffer, iDescriptorBufferLength);
@@ -345,23 +343,26 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 					GetISO_639_Language_Descriptor(&stISO_639_LanguageDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
 					jclass iso_639_LanguageDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/ISO_639_Language_Descriptor");
 					jmethodID iso_639_LanguageDescriptorConstrocMID = (*env)->GetMethodID(env, iso_639_LanguageDescriptorBeanClass, "<init>", "(II[Lcom/alex/ts_parser/bean/descriptor/ISO_639_LanguageCode;I)V");
-					int iso639LanguageCodeCount = (stISO_639_LanguageDescriptor.uiDescriptor_length - 1) / sizeof(ISO_639_LANGUAGE_CODE_T);
+					int iso639LanguageCodeCount = (stISO_639_LanguageDescriptor.uiDescriptor_length - 1) / 3;
 					jobjectArray iso639LanguageCodeArray = GetISO639LanguageCodeBeanArray(env, stISO_639_LanguageDescriptor.astISO_639_Language_code, iso639LanguageCodeCount);
 					descriptorBean = (*env)->NewObject(env, iso_639_LanguageDescriptorBeanClass, iso_639_LanguageDescriptorConstrocMID, stISO_639_LanguageDescriptor.uiDescriptor_tag, stISO_639_LanguageDescriptor.uiDescriptor_length,
 							iso639LanguageCodeArray, stISO_639_LanguageDescriptor.uiAudio_type);
 					break;
-//				case SYSTEM_CLOCK_DESCRIPTOR_TAG:
-//					GetSystemClockDescriptor(&stSystemClockDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-//					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
-//					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
-//					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
-//					break;
-//				case MAXIMUM_BITRATE_DESCRIPTOR_TAG:
-//					GetMaximumBitrateDescriptor(&stMaximumBitrateDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-//					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
-//					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
-//					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
-//					break;
+				case SYSTEM_CLOCK_DESCRIPTOR_TAG:
+					GetSystemClockDescriptor(&stSystemClockDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					jclass systemClockDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/SystemClockDescriptor");
+					jmethodID systemClockDescriptorConstrocMID = (*env)->GetMethodID(env, systemClockDescriptorBeanClass, "<init>", "(IIIIIII)V");
+					descriptorBean = (*env)->NewObject(env, systemClockDescriptorBeanClass, systemClockDescriptorConstrocMID, stSystemClockDescriptor.uiDescriptor_tag, stSystemClockDescriptor.uiDescriptor_length,
+							stSystemClockDescriptor.uiExternal_clock_reference_indicator, stSystemClockDescriptor.uiReserved_first, stSystemClockDescriptor.uiClock_accuracy_integer, stSystemClockDescriptor.uiClock_accuracy_exponent,
+							stSystemClockDescriptor.uiReserved_second);
+					break;
+				case MAXIMUM_BITRATE_DESCRIPTOR_TAG:
+					GetMaximumBitrateDescriptor(&stMaximumBitrateDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					jclass maximumBitrateDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/MaximumBitrateDescriptor");
+					jmethodID maximumBitrateDescriptorConstrocMID = (*env)->GetMethodID(env, maximumBitrateDescriptorBeanClass, "<init>", "(IIII)V");
+					descriptorBean = (*env)->NewObject(env, maximumBitrateDescriptorBeanClass, maximumBitrateDescriptorConstrocMID, stMaximumBitrateDescriptor.uiDescriptor_tag, stMaximumBitrateDescriptor.uiDescriptor_length,
+							stMaximumBitrateDescriptor.uiReserved, stMaximumBitrateDescriptor.uiMaximum_bitrate);
+					break;
 				case NETWORK_NAME_DESCRIPTOR_TAG:
 					GetNetworkNameDescriptor(&stNetworkNameDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
 					jclass networkNameDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/NetworkNameDescriptor");
@@ -393,12 +394,14 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 							stSatelliteDeliverySystemDescriptor.uiPolarization, stSatelliteDeliverySystemDescriptor.uiRoll_off, stSatelliteDeliverySystemDescriptor.uiModulation_system, stSatelliteDeliverySystemDescriptor.uiModulation_type,
 							stSatelliteDeliverySystemDescriptor.uiSymbol_rate, stSatelliteDeliverySystemDescriptor.uiFEC_inner);
 					break;
-//				case CABLE_DELIVERY_SYSTEM_DESCRIPTOR_TAG:
-//					GetCableDeliverySystemDescriptor(&stCableDeliverySystemDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-//					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
-//					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
-//					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
-//					break;
+				case CABLE_DELIVERY_SYSTEM_DESCRIPTOR_TAG:
+					GetCableDeliverySystemDescriptor(&stCableDeliverySystemDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					jclass cableDeliverySystemDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CableDeliverySystemDescriptor");
+					jmethodID cableDeliverySystemDescriptorConstrocMID = (*env)->GetMethodID(env, cableDeliverySystemDescriptorBeanClass, "<init>", "(IIIIIIII)V");
+					descriptorBean = (*env)->NewObject(env, cableDeliverySystemDescriptorBeanClass, cableDeliverySystemDescriptorConstrocMID, stCableDeliverySystemDescriptor.uiDescriptor_tag, stCableDeliverySystemDescriptor.uiDescriptor_length,
+							stCableDeliverySystemDescriptor.uiFrequency, stCableDeliverySystemDescriptor.uiReserved_future_use, stCableDeliverySystemDescriptor.uiFec_outer, stCableDeliverySystemDescriptor.uiModulation,
+							stCableDeliverySystemDescriptor.uiSymbol_rate, stCableDeliverySystemDescriptor.uiFEC_inner);
+					break;
 //				case BOUQUET_NAME_DESCRIPTOR_TAG:
 //					GetBouquetNameDescriptor(&stBouquetNameDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
 //					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
@@ -429,18 +432,31 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 //					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
 //					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
 //					break;
-//				case STREAM_IDENTIFIER_DESCRIPTOR_TAG:
-//					GetStreamIndentifierDescriptor(&stStreamIndentifierDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-//					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
-//					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
-//					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
-//					break;
-//				case TELETEXT_DESCRIPTOR_TAG:
-//					GetTeletextDescriptor(&stTeletextDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-//					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
-//					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
-//					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
-//					break;
+				case STREAM_IDENTIFIER_DESCRIPTOR_TAG:
+					GetStreamIndentifierDescriptor(&stStreamIndentifierDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					jclass streamIndentifierDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/StreamIndentifierDescriptor");
+					jmethodID streamIndentifierDescriptorConstrocMID = (*env)->GetMethodID(env, streamIndentifierDescriptorBeanClass, "<init>", "(III)V");
+					descriptorBean = (*env)->NewObject(env, streamIndentifierDescriptorBeanClass, streamIndentifierDescriptorConstrocMID, stStreamIndentifierDescriptor.uiDescriptor_tag, stStreamIndentifierDescriptor.uiDescriptor_length,
+							stStreamIndentifierDescriptor.uiComponent_tag);
+					break;
+				case TELETEXT_DESCRIPTOR_TAG:
+					GetTeletextDescriptor(&stTeletextDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					jclass teletextDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/TeletextDescriptor");
+					jmethodID teletextDescriptorConstrocMID = (*env)->GetMethodID(env, teletextDescriptorBeanClass, "<init>", "(II[Lcom/alex/ts_parser/bean/descriptor/TeletextInfo;)V");
+					jclass teletextInfoBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/TeletextInfo");
+					jmethodID teletextInfoConstrocMID = (*env)->GetMethodID(env, teletextInfoBeanClass, "<init>", "(Lcom/alex/ts_parser/bean/descriptor/ISO_639_LanguageCode;III)V");
+
+					iLoopCount = stTeletextDescriptor.uiDescriptor_length / 5;
+					tempObjectArray = (*env)->NewObjectArray(env, iLoopCount, teletextInfoBeanClass, NULL);
+					for (iLoopIndex = 0; iLoopIndex < iLoopCount; iLoopIndex++)
+					{
+						jobject iso639LanguageCodeBean = GetISO639LanguageCodeBean(env, &stTeletextDescriptor.astTeletext_Info[iLoopIndex].stISO_639_Language_code);
+						tempObject = (*env)->NewObject(env, teletextInfoBeanClass, teletextInfoConstrocMID, iso639LanguageCodeBean, stTeletextDescriptor.astTeletext_Info[iLoopIndex].uiTeletext_type,
+								stTeletextDescriptor.astTeletext_Info[iLoopIndex].uiTeletext_magazine_number, stTeletextDescriptor.astTeletext_Info[iLoopIndex].uiTeletext_page_number);
+						(*env)->SetObjectArrayElement(env, tempObjectArray, iLoopIndex, tempObject);
+					}
+					descriptorBean = (*env)->NewObject(env, teletextDescriptorBeanClass, teletextDescriptorConstrocMID, stTeletextDescriptor.uiDescriptor_tag, stTeletextDescriptor.uiDescriptor_length, tempObjectArray);
+					break;
 //				case LOCAL_TIME_OFFSET_DESCRIPTOR_TAG:
 //					GetLocalTimeOffsetDescriptor(&stLocalTimeOffsetDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
 //					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
@@ -492,7 +508,6 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 		}
 	}
 	while (iDescriptorPosition < iDescriptorBufferLength);
-
 	return 1;
 }
 
@@ -530,13 +545,13 @@ jobject GetISO639LanguageCodeBean(JNIEnv *env, ISO_639_LANGUAGE_CODE_T *pstISO_6
  ******************************************************/
 jobjectArray GetISO639LanguageCodeBeanArray(JNIEnv *env, ISO_639_LANGUAGE_CODE_T pastISO_639_Language_CodeArray[], int iso639LanguageCodeCount)
 {
-	jobjectArray iso639LanguageCodeArray;
-	jobject iso639LanguageCodeBean;
+	jclass iso639LanguageCodeBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/ISO_639_LanguageCode");
+	jobjectArray iso639LanguageCodeArray = (*env)->NewObjectArray(env, iso639LanguageCodeCount, iso639LanguageCodeBeanClass, NULL);
 	int index = 0;
 	for (index = 0; index < iso639LanguageCodeCount; index++)
 	{
-		iso639LanguageCodeBean = GetISO639LanguageCodeBean(env, &pastISO_639_Language_CodeArray[index]);
-		iso639LanguageCodeArray = (*env)->NewObjectArray(env, iso639LanguageCodeCount, iso639LanguageCodeBean, NULL);
+		jobject iso639LanguageCodeBean = GetISO639LanguageCodeBean(env, &pastISO_639_Language_CodeArray[index]);
+		(*env)->SetObjectArrayElement(env, iso639LanguageCodeArray, index, iso639LanguageCodeBean);
 	}
 	return iso639LanguageCodeArray;
 }
@@ -580,4 +595,3 @@ char* Jstring2CharPointer(JNIEnv *env, jstring filePath)
 	(*env)->ReleaseByteArrayElements(env, barr, ba, 0);
 	return pcFilePath;
 }
-
