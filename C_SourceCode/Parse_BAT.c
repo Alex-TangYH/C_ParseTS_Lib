@@ -22,7 +22,7 @@
 void ParseBAT_SectionHead(TS_BAT_T *pstTS_BAT, unsigned char *pucSectionBuffer)
 {
 	int iBAT_SectionLength = 0;
-	pstTS_BAT->uitable_id = pucSectionBuffer[0];
+	pstTS_BAT->uiTable_id = pucSectionBuffer[0];
 	pstTS_BAT->uiSection_syntax_indicator = pucSectionBuffer[1] >> 7;
 	pstTS_BAT->uiReserved_future_use_first = (pucSectionBuffer[1] >> 6) & 0x01;
 	pstTS_BAT->uiReserved_first = (pucSectionBuffer[1] >> 4) & 0x03;
@@ -34,14 +34,14 @@ void ParseBAT_SectionHead(TS_BAT_T *pstTS_BAT, unsigned char *pucSectionBuffer)
 	pstTS_BAT->uiSection_number = pucSectionBuffer[6];
 	pstTS_BAT->uiLast_section_number = pucSectionBuffer[7];
 	pstTS_BAT->uiReserved_future_use_second = pucSectionBuffer[8] >> 4;
-	pstTS_BAT->uiBoquet_descriptor_length = ((pucSectionBuffer[8] & 0x0f) << 8) | pucSectionBuffer[9];
+	pstTS_BAT->uiBouquet_descriptor_length = ((pucSectionBuffer[8] & 0x0f) << 8) | pucSectionBuffer[9];
 
-	if (pstTS_BAT->uiBoquet_descriptor_length > 0)
+	if (pstTS_BAT->uiBouquet_descriptor_length > 0)
 	{
-		memcpy(pstTS_BAT->aucDescriptor, pucSectionBuffer + 10, pstTS_BAT->uiBoquet_descriptor_length);
+		memcpy(pstTS_BAT->aucDescriptor, pucSectionBuffer + 10, pstTS_BAT->uiBouquet_descriptor_length);
 	}
-	pstTS_BAT->uiReserved_third = pucSectionBuffer[10 + pstTS_BAT->uiBoquet_descriptor_length] >> 4;
-	pstTS_BAT->uiTransport_stream_loop_lenth = ((pucSectionBuffer[10 + pstTS_BAT->uiBoquet_descriptor_length] & 0x0f) << 8) | pucSectionBuffer[11 + pstTS_BAT->uiBoquet_descriptor_length];
+	pstTS_BAT->uiReserved_third = pucSectionBuffer[10 + pstTS_BAT->uiBouquet_descriptor_length] >> 4;
+	pstTS_BAT->uiTransport_stream_loop_length = ((pucSectionBuffer[10 + pstTS_BAT->uiBouquet_descriptor_length] & 0x0f) << 8) | pucSectionBuffer[11 + pstTS_BAT->uiBouquet_descriptor_length];
 
 	iBAT_SectionLength = 3 + pstTS_BAT->uiSection_length;
 	pstTS_BAT->uiCRC_32 = (pucSectionBuffer[iBAT_SectionLength - 4] << 24) | (pucSectionBuffer[iBAT_SectionLength - 3] << 16) | (pucSectionBuffer[iBAT_SectionLength - 2] << 8) | (pucSectionBuffer[iBAT_SectionLength - 1]);
@@ -60,16 +60,16 @@ int ParseBAT_Section(TS_BAT_T *pstTS_BAT, unsigned char *pucSectionBuffer)
 	int iLoopCount = 0;
 	ParseBAT_SectionHead(pstTS_BAT, pucSectionBuffer);
 	iBAT_SectionLength = 3 + pstTS_BAT->uiSection_length;
-	for (iLoopPosition = 10 + pstTS_BAT->uiBoquet_descriptor_length + 2; iLoopPosition < iBAT_SectionLength - 4; iLoopPosition += 6)
+	for (iLoopPosition = 10 + pstTS_BAT->uiBouquet_descriptor_length + 2; iLoopPosition < iBAT_SectionLength - 4; iLoopPosition += 6)
 	{
-		pstTS_BAT->stBAT_info[iLoopCount].uiTransport_stream_id = (pucSectionBuffer[iLoopPosition + 0] << 8) | pucSectionBuffer[iLoopPosition + 1];
-		pstTS_BAT->stBAT_info[iLoopCount].uiOriginal_network_id = (pucSectionBuffer[iLoopPosition + 2] << 8) | pucSectionBuffer[iLoopPosition + 3];
-		pstTS_BAT->stBAT_info[iLoopCount].uiReserved_future_use_third = pucSectionBuffer[iLoopPosition + 4] >> 4;
-		pstTS_BAT->stBAT_info[iLoopCount].uiTransport_descriptor_length = ((pucSectionBuffer[iLoopPosition + 4] & 0x0f) << 8) | pucSectionBuffer[iLoopPosition + 5];
-		if (pstTS_BAT->stBAT_info[iLoopCount].uiTransport_descriptor_length > 0)
+		pstTS_BAT->astBAT_info[iLoopCount].uiTransport_stream_id = (pucSectionBuffer[iLoopPosition + 0] << 8) | pucSectionBuffer[iLoopPosition + 1];
+		pstTS_BAT->astBAT_info[iLoopCount].uiOriginal_network_id = (pucSectionBuffer[iLoopPosition + 2] << 8) | pucSectionBuffer[iLoopPosition + 3];
+		pstTS_BAT->astBAT_info[iLoopCount].uiReserved_future_use = pucSectionBuffer[iLoopPosition + 4] >> 4;
+		pstTS_BAT->astBAT_info[iLoopCount].uiTransport_descriptor_length = ((pucSectionBuffer[iLoopPosition + 4] & 0x0f) << 8) | pucSectionBuffer[iLoopPosition + 5];
+		if (pstTS_BAT->astBAT_info[iLoopCount].uiTransport_descriptor_length > 0)
 		{
-			memcpy(pstTS_BAT->stBAT_info[iLoopCount].aucDescriptor, pucSectionBuffer + iLoopPosition + 6, pstTS_BAT->stBAT_info[iLoopCount].uiTransport_descriptor_length);
-			iLoopPosition += pstTS_BAT->stBAT_info[iLoopCount].uiTransport_descriptor_length;
+			memcpy(pstTS_BAT->astBAT_info[iLoopCount].aucDescriptor, pucSectionBuffer + iLoopPosition + 6, pstTS_BAT->astBAT_info[iLoopCount].uiTransport_descriptor_length);
+			iLoopPosition += pstTS_BAT->astBAT_info[iLoopCount].uiTransport_descriptor_length;
 		}
 		iLoopCount++;
 	}
@@ -88,7 +88,7 @@ void PrintBAT(TS_BAT_T *pstTS_BAT, int iBAT_InfoCount)
 	
 	DUBUGPRINTF("\n-------------BAT info start-------------\n");
 	
-	DUBUGPRINTF("BAT->table_id: 0x%02x\n", pstTS_BAT->uitable_id);
+	DUBUGPRINTF("BAT->table_id: 0x%02x\n", pstTS_BAT->uiTable_id);
 	DUBUGPRINTF("BAT->Section_syntax_indicator: 0x%02x\n", pstTS_BAT->uiSection_syntax_indicator);
 	DUBUGPRINTF("BAT->Reserved_future_use_first: 0x%02x\n", pstTS_BAT->uiReserved_future_use_first);
 	DUBUGPRINTF("BAT->Reserved_first: 0x%02x\n", pstTS_BAT->uiReserved_first);
@@ -100,31 +100,31 @@ void PrintBAT(TS_BAT_T *pstTS_BAT, int iBAT_InfoCount)
 	DUBUGPRINTF("BAT->Section_number: 0x%02x\n", pstTS_BAT->uiSection_number);
 	DUBUGPRINTF("BAT->Last_section_number: 0x%02x\n", pstTS_BAT->uiLast_section_number);
 	DUBUGPRINTF("BAT->Reserved_future_use_second: 0x%02x\n", pstTS_BAT->uiReserved_future_use_second);
-	DUBUGPRINTF("BAT->Boquet_descriptor_length: 0x%02x\n", pstTS_BAT->uiBoquet_descriptor_length);
+	DUBUGPRINTF("BAT->Boquet_descriptor_length: 0x%02x\n", pstTS_BAT->uiBouquet_descriptor_length);
 	
-	if (pstTS_BAT->uiBoquet_descriptor_length > 0)
+	if (pstTS_BAT->uiBouquet_descriptor_length > 0)
 	{
 		memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 		sprintf(acOutputPrefix, "BAT->");
-		ParseAndPrintDescriptor(pstTS_BAT->aucDescriptor, pstTS_BAT->uiBoquet_descriptor_length, acOutputPrefix);
+		ParseAndPrintDescriptor(pstTS_BAT->aucDescriptor, pstTS_BAT->uiBouquet_descriptor_length, acOutputPrefix);
 	}
 	
 	DUBUGPRINTF("BAT->Reserved_future_use_second: 0x%02x\n", pstTS_BAT->uiReserved_future_use_second);
-	DUBUGPRINTF("BAT->Transport_stream_loop_lenth: 0x%02x\n", pstTS_BAT->uiTransport_stream_loop_lenth);
+	DUBUGPRINTF("BAT->Transport_stream_loop_lenth: 0x%02x\n", pstTS_BAT->uiTransport_stream_loop_length);
 	DUBUGPRINTF("BAT->CRC_32: 0x%08lx\n", pstTS_BAT->uiCRC_32);
 
 	for (iLoopTime = 0; iLoopTime < iBAT_InfoCount; iLoopTime++)
 	{
-		DUBUGPRINTF("BAT->BAT_info[%d].Transport_stream_id: 0x%02x\n", iLoopTime, pstTS_BAT->stBAT_info[iLoopTime].uiTransport_stream_id);
-		DUBUGPRINTF("BAT->BAT_info[%d].Original_network_id: 0x%02x\n", iLoopTime, pstTS_BAT->stBAT_info[iLoopTime].uiOriginal_network_id);
-		DUBUGPRINTF("BAT->BAT_info[%d].Reserved_future_use_third: 0x%02x\n", iLoopTime, pstTS_BAT->stBAT_info[iLoopTime].uiReserved_future_use_third);
-		DUBUGPRINTF("BAT->BAT_info[%d].Transport_descriptor_length: 0x%02x\n", iLoopTime, pstTS_BAT->stBAT_info[iLoopTime].uiTransport_descriptor_length);
+		DUBUGPRINTF("BAT->BAT_info[%d].Transport_stream_id: 0x%02x\n", iLoopTime, pstTS_BAT->astBAT_info[iLoopTime].uiTransport_stream_id);
+		DUBUGPRINTF("BAT->BAT_info[%d].Original_network_id: 0x%02x\n", iLoopTime, pstTS_BAT->astBAT_info[iLoopTime].uiOriginal_network_id);
+		DUBUGPRINTF("BAT->BAT_info[%d].Reserved_future_use_third: 0x%02x\n", iLoopTime, pstTS_BAT->astBAT_info[iLoopTime].uiReserved_future_use);
+		DUBUGPRINTF("BAT->BAT_info[%d].Transport_descriptor_length: 0x%02x\n", iLoopTime, pstTS_BAT->astBAT_info[iLoopTime].uiTransport_descriptor_length);
 		
-		if (pstTS_BAT->uiBoquet_descriptor_length > 0)
+		if (pstTS_BAT->uiBouquet_descriptor_length > 0)
 		{
 			memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 			sprintf(acOutputPrefix, "BAT->BAT_info[%d].", iLoopTime);
-			ParseAndPrintDescriptor(pstTS_BAT->stBAT_info[iLoopTime].aucDescriptor, pstTS_BAT->stBAT_info[iLoopTime].uiTransport_descriptor_length, acOutputPrefix);
+			ParseAndPrintDescriptor(pstTS_BAT->astBAT_info[iLoopTime].aucDescriptor, pstTS_BAT->astBAT_info[iLoopTime].uiTransport_descriptor_length, acOutputPrefix);
 		}
 	}
 	DUBUGPRINTF("\n-------------BAT info end-------------\n");

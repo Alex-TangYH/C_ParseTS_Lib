@@ -71,6 +71,14 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseTDT
   (JNIEnv *, jclass, jstring);
 
+/*
+ * Class:     com_alex_ts_parser_native_function_NativeFunctionManager
+ * Method:    parseSDT
+ * Signature: (Ljava/lang/String;)Lcom/alex/ts_parser/bean/si/SDT_Table;
+ */
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseSDT
+  (JNIEnv *, jclass, jstring);
+
 #ifdef __cplusplus
 }
 #endif

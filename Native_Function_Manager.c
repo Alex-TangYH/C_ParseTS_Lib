@@ -157,11 +157,11 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 			jmethodID transportDescriptorConstrocMID = (*env)->GetMethodID(env, transportDescriptorBeanClass, "<init>", "(IIII[Lcom/alex/ts_parser/bean/descriptor/Descriptor;)V");
 			for (infoIndex = 0; infoIndex < iTransportStreamDescriptorCount; ++infoIndex)
 			{
-				int iDescriptorCount = GetDescriptorCountInBuffer(stNIT.stNIT_stream[infoIndex].aucDescriptor, stNIT.stNIT_stream[infoIndex].uiTransport_descriport_length);
+				int iDescriptorCount = GetDescriptorCountInBuffer(stNIT.astNIT_stream[infoIndex].aucDescriptor, stNIT.astNIT_stream[infoIndex].uiTransport_descriport_length);
 				jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
-				ParseDescriptorToJArray(env, &descriptorBeanArray, stNIT.stNIT_stream[infoIndex].aucDescriptor, stNIT.stNIT_stream[infoIndex].uiTransport_descriport_length);
-				jobject transportDescriptorBean = (*env)->NewObject(env, transportDescriptorBeanClass, transportDescriptorConstrocMID, stNIT.stNIT_stream[infoIndex].uiTransport_stream_id, stNIT.stNIT_stream[infoIndex].uiOriginal_network_id,
-						stNIT.stNIT_stream[infoIndex].uiReserved_future_use, stNIT.stNIT_stream[infoIndex].uiTransport_descriport_length, descriptorBeanArray);
+				ParseDescriptorToJArray(env, &descriptorBeanArray, stNIT.astNIT_stream[infoIndex].aucDescriptor, stNIT.astNIT_stream[infoIndex].uiTransport_descriport_length);
+				jobject transportDescriptorBean = (*env)->NewObject(env, transportDescriptorBeanClass, transportDescriptorConstrocMID, stNIT.astNIT_stream[infoIndex].uiTransport_stream_id, stNIT.astNIT_stream[infoIndex].uiOriginal_network_id,
+						stNIT.astNIT_stream[infoIndex].uiReserved_future_use, stNIT.astNIT_stream[infoIndex].uiTransport_descriport_length, descriptorBeanArray);
 				(*env)->SetObjectArrayElement(env, transportDescriptorBeanArray, infoIndex, transportDescriptorBean);
 			}
 			jobject nitBean = (*env)->NewObject(env, nitBeanClass, nitConstrocMID, stNIT.uiTable_id, stNIT.uiSection_syntax_indicator, stNIT.uiReserved_future_use_first, stNIT.uiReserved_first, stNIT.uiSection_length, stNIT.uiNetwork_id,
@@ -281,18 +281,18 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 		{
 			jclass totBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/si/TOT_Table");
 			jmethodID totConstrocMID = (*env)->GetMethodID(env, totBeanClass, "<init>", "(IIIII[III[Lcom/alex/ts_parser/bean/descriptor/Descriptor;I)V");
-			jintArray jintArray = GetJintArrayFromIntArray(env, stTot.auiUTC_time, 5);
+			jintArray jIntArray = GetJintArrayFromIntArray(env, stTot.auiUTC_time, 5);
 
 			jclass descriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/Descriptor");
 			int iDescriptorCount = GetDescriptorCountInBuffer(stTot.aucDescriptor, stTot.uiDescriptors_loop_length);
 			jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
 			ParseDescriptorToJArray(env, &descriptorBeanArray, stTot.aucDescriptor, stTot.uiDescriptors_loop_length);
 
-			jobject totBean = (*env)->NewObject(env, totBeanClass, totConstrocMID, stTot.uitable_id, stTot.uiSection_syntax_indicator, stTot.uiReserved_future_use, stTot.uiReserved_first, stTot.uiSection_length, jintArray, stTot.uiReserved_second,
+			jobject totBean = (*env)->NewObject(env, totBeanClass, totConstrocMID, stTot.uiTable_id, stTot.uiSection_syntax_indicator, stTot.uiReserved_future_use, stTot.uiReserved_first, stTot.uiSection_length, jIntArray, stTot.uiReserved_second,
 					stTot.uiDescriptors_loop_length, descriptorBeanArray, stTot.uiCRC_32);
 
 			(*env)->DeleteLocalRef(env, descriptorBeanClass);
-			(*env)->DeleteLocalRef(env, jintArray);
+			(*env)->DeleteLocalRef(env, jIntArray);
 			(*env)->DeleteLocalRef(env, totBeanClass);
 			(*env)->DeleteLocalRef(env, descriptorBeanArray);
 			return totBean;
@@ -327,15 +327,67 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 		{
 			jclass tdtBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/si/TDT_Table");
 			jmethodID tdtConstrocMID = (*env)->GetMethodID(env, tdtBeanClass, "<init>", "(IIIII[I)V");
-			jint intTempArray[5];
-			jintArray jintArray = GetJintArrayFromIntArray(env, stTdt.auiUTC_time, 5);
-			jobject tdtBean = (*env)->NewObject(env, tdtBeanClass, tdtConstrocMID, stTdt.uitable_id, stTdt.uiSection_syntax_indicator, stTdt.uiReserved_future_use, stTdt.uiReserved, stTdt.uiSection_length, jintArray);
-			(*env)->DeleteLocalRef(env, jintArray);
+			jintArray jIntArray = GetJintArrayFromIntArray(env, stTdt.auiUTC_time, 5);
+			jobject tdtBean = (*env)->NewObject(env, tdtBeanClass, tdtConstrocMID, stTdt.uiTable_id, stTdt.uiSection_syntax_indicator, stTdt.uiReserved_future_use, stTdt.uiReserved, stTdt.uiSection_length, jIntArray);
+			(*env)->DeleteLocalRef(env, jIntArray);
 			return tdtBean;
 		}
 	}
 }
 
+/******************************************
+ *
+ * Ω‚ŒˆSDT
+ *
+ ******************************************/
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseSDT(JNIEnv *env, jclass obj, jstring filePath)
+{
+	char *pcFilePath = Jstring2CharPointer(env, filePath);
+	FILE *pfTsFile = GetFilePointer(pcFilePath);
+
+	if (pfTsFile == NULL)
+	{
+		return NULL;
+	}
+	else
+	{
+		TS_SDT_T stSdt = { 0 };
+		int count = 0;
+		int resultOfGetTable = GetSDTTable(pfTsFile, &stSdt, &count);
+		if (-1 == resultOfGetTable)
+		{
+			LOG("no sdt\n");
+			return NULL;
+		}
+		else
+		{
+			int iLoopIndex = 0;
+			jclass sdtInfoClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/si/SdtInfo");
+			jmethodID sdtInfoConstrocMID = (*env)->GetMethodID(env, sdtInfoClass, "<init>", "(IIIIIII[Lcom/alex/ts_parser/bean/descriptor/Descriptor;)V");
+			jobjectArray sdtInfoArray = (*env)->NewObjectArray(env, count, sdtInfoClass, NULL);
+
+			jclass descriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/Descriptor");
+			for (iLoopIndex = 0; iLoopIndex < count; iLoopIndex++)
+			{
+				SDT_INFO_T stSdtInfo = stSdt.astSDT_info[iLoopIndex];
+				printf("==================stSdtInfo.uiService_id : %d================== \n", stSdtInfo.uiService_id);
+				int iDescriptorCount = GetDescriptorCountInBuffer(stSdtInfo.aucDescriptor, stSdtInfo.uiDescriptor_loop_length);
+				jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
+				ParseDescriptorToJArray(env, &descriptorBeanArray, stSdtInfo.aucDescriptor, stSdtInfo.uiDescriptor_loop_length);
+				jobject sdtInfoBean = (*env)->NewObject(env, sdtInfoClass, sdtInfoConstrocMID, stSdtInfo.uiService_id, stSdtInfo.uiReserved_future_use, stSdtInfo.uiEIT_schedule_flag, stSdtInfo.uiEIT_present_following_flag, stSdtInfo.uiRunning_status,
+						stSdtInfo.uiFree_CA_mode, stSdtInfo.uiDescriptor_loop_length, descriptorBeanArray);
+				(*env)->SetObjectArrayElement(env, sdtInfoArray, iLoopIndex, sdtInfoBean);
+			}
+			(*env)->DeleteLocalRef(env, descriptorBeanClass);
+
+			jclass sdtBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/si/SDT_Table");
+			jmethodID sdtConstrocMID = (*env)->GetMethodID(env, sdtBeanClass, "<init>", "(IIIIIIIIIIIII[Lcom/alex/ts_parser/bean/si/SdtInfo;I)V");
+			jobject sdtBean = (*env)->NewObject(env, sdtBeanClass, sdtConstrocMID, stSdt.uiTable_id, stSdt.uiSection_syntax_indicator, stSdt.uiReserved_future_use_first, stSdt.uiReserved_first, stSdt.uiSection_length, stSdt.uiTransport_stream_id,
+					stSdt.uiReserved_second, stSdt.uiVersion_number, stSdt.uiCurrent_next_indicator, stSdt.uiSection_number, stSdt.uiLast_section_number, stSdt.uiOriginal_network_id, stSdt.uiReserved_future_use_second, sdtInfoArray, stSdt.uiCRC_32);
+			return sdtBean;
+		}
+	}
+}
 /******************************************
  *
  * Ω‚Œˆ√Ë ˆ¡˜

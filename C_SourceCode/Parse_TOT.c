@@ -18,7 +18,7 @@ void ParseTOT_Section(TS_TOT_T *pstTS_TOT, unsigned char *pucSectionBuffer)
 {
 	int iTOT_length = 0;
 	int iUTC_timePosition = 0;
-	pstTS_TOT->uitable_id = pucSectionBuffer[0];
+	pstTS_TOT->uiTable_id = pucSectionBuffer[0];
 	pstTS_TOT->uiSection_syntax_indicator = pucSectionBuffer[1] >> 7;
 	pstTS_TOT->uiReserved_future_use = (pucSectionBuffer[1] >> 6) & 0x01;
 	pstTS_TOT->uiReserved_first = (pucSectionBuffer[1] >> 4) & 0x03;
@@ -40,7 +40,7 @@ void PrintTOT(TS_TOT_T *pstTS_TOT)
 {
 	char acOutputPrefix[OUTPUT_PREFIX_SIZE] = { 0 };
 	DUBUGPRINTF("\n-------------TOT info start-------------\n");
-	DUBUGPRINTF("TOT->table_id: 0x%02x\n", pstTS_TOT->uitable_id);
+	DUBUGPRINTF("TOT->table_id: 0x%02x\n", pstTS_TOT->uiTable_id);
 	DUBUGPRINTF("TOT->Section_syntax_indicator: 0x%02x\n", pstTS_TOT->uiSection_syntax_indicator);
 	DUBUGPRINTF("TOT->Reserved_future_use: 0x%02x\n", pstTS_TOT->uiReserved_future_use);
 	DUBUGPRINTF("TOT->Reserved_first: 0x%02x\n", pstTS_TOT->uiReserved_first);

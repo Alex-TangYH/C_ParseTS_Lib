@@ -108,7 +108,9 @@ int ParseTransportStream(FILE *pfTsFile)
 	TS_NIT_T stNIT = { 0 };
 	TS_TDT_T stTS_TDT = { 0 };
 	TS_TOT_T stTS_TOT = { 0 };
+	TS_SDT_T stTS_SDT = { 0 };
 	int nitTransportStreamDescriptorCount = 0;
+	int iSdtInfoCount = 0;
 
 	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
 	if (-1 == iTsLength)
@@ -150,7 +152,7 @@ int ParseTransportStream(FILE *pfTsFile)
 		return -1;
 	}
 
-	if (-1 == ParseSDT_Table(pfTsFile, iTsPosition, iTsLength))
+	if (-1 == ParseSDT_Table(pfTsFile, iTsPosition, iTsLength, &stTS_SDT, &iSdtInfoCount))
 	{
 		return -1;
 	}

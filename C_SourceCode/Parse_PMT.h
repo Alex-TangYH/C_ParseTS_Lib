@@ -15,7 +15,7 @@ typedef struct PMT_INFO_T
 {
 	unsigned int uiProgramNumber :16;
 	unsigned int uiVideoPID :13;
-	unsigned int uiAudioPID[PMT_VUDIO_COUNT];
+	unsigned int auiAudioPID[PMT_VUDIO_COUNT];
 } PMT_INFO_T;
 
 typedef struct TS_PMT_STREAM_T

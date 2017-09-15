@@ -64,14 +64,14 @@ int ParseNIT_Section(TS_NIT_T * pstTS_NIT, unsigned char *pucSectionBuffer)
 
 	for (iTransportStreamPostion = 10 + iNetworkDescriptorLength + 2; iTransportStreamPostion < iNIT_Length - 4; iTransportStreamPostion += 6)
 	{
-		pstTS_NIT->stNIT_stream[iTransportStreamCount].uiTransport_stream_id = (pucSectionBuffer[iTransportStreamPostion] << 8) | pucSectionBuffer[1 + iTransportStreamPostion];
-		pstTS_NIT->stNIT_stream[iTransportStreamCount].uiOriginal_network_id = (pucSectionBuffer[2 + iTransportStreamPostion] << 8) | pucSectionBuffer[3 + iTransportStreamPostion];
-		pstTS_NIT->stNIT_stream[iTransportStreamCount].uiReserved_future_use = pucSectionBuffer[4 + iTransportStreamPostion] >> 4;
-		pstTS_NIT->stNIT_stream[iTransportStreamCount].uiTransport_descriport_length = ((pucSectionBuffer[4 + iTransportStreamPostion] & 0x0f) << 8) | pucSectionBuffer[5 + iTransportStreamPostion];
-		if (0 != pstTS_NIT->stNIT_stream[iTransportStreamCount].uiTransport_descriport_length)
+		pstTS_NIT->astNIT_stream[iTransportStreamCount].uiTransport_stream_id = (pucSectionBuffer[iTransportStreamPostion] << 8) | pucSectionBuffer[1 + iTransportStreamPostion];
+		pstTS_NIT->astNIT_stream[iTransportStreamCount].uiOriginal_network_id = (pucSectionBuffer[2 + iTransportStreamPostion] << 8) | pucSectionBuffer[3 + iTransportStreamPostion];
+		pstTS_NIT->astNIT_stream[iTransportStreamCount].uiReserved_future_use = pucSectionBuffer[4 + iTransportStreamPostion] >> 4;
+		pstTS_NIT->astNIT_stream[iTransportStreamCount].uiTransport_descriport_length = ((pucSectionBuffer[4 + iTransportStreamPostion] & 0x0f) << 8) | pucSectionBuffer[5 + iTransportStreamPostion];
+		if (0 != pstTS_NIT->astNIT_stream[iTransportStreamCount].uiTransport_descriport_length)
 		{
-			memcpy(pstTS_NIT->stNIT_stream[iTransportStreamCount].aucDescriptor, pucSectionBuffer + iTransportStreamPostion + 6, pstTS_NIT->stNIT_stream[iTransportStreamCount].uiTransport_descriport_length);
-			iTransportStreamPostion += pstTS_NIT->stNIT_stream[iTransportStreamCount].uiTransport_descriport_length;
+			memcpy(pstTS_NIT->astNIT_stream[iTransportStreamCount].aucDescriptor, pucSectionBuffer + iTransportStreamPostion + 6, pstTS_NIT->astNIT_stream[iTransportStreamCount].uiTransport_descriport_length);
+			iTransportStreamPostion += pstTS_NIT->astNIT_stream[iTransportStreamCount].uiTransport_descriport_length;
 		}
 		iTransportStreamCount++;
 	}
@@ -112,15 +112,15 @@ void PrintNIT(TS_NIT_T * pstTS_NIT, int iNIT_TransportStreamCount)
 	{
 		for (iLoopTime = 0; iLoopTime < iNIT_TransportStreamCount; iLoopTime++)
 		{
-			DUBUGPRINTF("NIT->NIT_stream[%d].Transport_stream_id : 0x%02x \n", iLoopTime, pstTS_NIT->stNIT_stream[iLoopTime].uiTransport_stream_id);
-			DUBUGPRINTF("NIT->NIT_stream[%d].Original_network_id : 0x%02x \n", iLoopTime, pstTS_NIT->stNIT_stream[iLoopTime].uiOriginal_network_id);
-			DUBUGPRINTF("NIT->NIT_stream[%d].Reserved_future_use_fourth : 0x%02x \n", iLoopTime, pstTS_NIT->stNIT_stream[iLoopTime].uiReserved_future_use);
-			DUBUGPRINTF("NIT->NIT_stream[%d].uiTransport_descriport_length : 0x%02x \n", iLoopTime, pstTS_NIT->stNIT_stream[iLoopTime].uiTransport_descriport_length);
-			if (pstTS_NIT->stNIT_stream[iLoopTime].uiTransport_descriport_length > 0)
+			DUBUGPRINTF("NIT->NIT_stream[%d].Transport_stream_id : 0x%02x \n", iLoopTime, pstTS_NIT->astNIT_stream[iLoopTime].uiTransport_stream_id);
+			DUBUGPRINTF("NIT->NIT_stream[%d].Original_network_id : 0x%02x \n", iLoopTime, pstTS_NIT->astNIT_stream[iLoopTime].uiOriginal_network_id);
+			DUBUGPRINTF("NIT->NIT_stream[%d].Reserved_future_use_fourth : 0x%02x \n", iLoopTime, pstTS_NIT->astNIT_stream[iLoopTime].uiReserved_future_use);
+			DUBUGPRINTF("NIT->NIT_stream[%d].uiTransport_descriport_length : 0x%02x \n", iLoopTime, pstTS_NIT->astNIT_stream[iLoopTime].uiTransport_descriport_length);
+			if (pstTS_NIT->astNIT_stream[iLoopTime].uiTransport_descriport_length > 0)
 			{
 				memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 				sprintf(acOutputPrefix, "NIT->NIT_stream[%d].", iLoopTime);
-				ParseAndPrintDescriptor(pstTS_NIT->stNIT_stream[iLoopTime].aucDescriptor, pstTS_NIT->stNIT_stream[iLoopTime].uiTransport_descriport_length, acOutputPrefix);
+				ParseAndPrintDescriptor(pstTS_NIT->astNIT_stream[iLoopTime].aucDescriptor, pstTS_NIT->astNIT_stream[iLoopTime].uiTransport_descriport_length, acOutputPrefix);
 			}
 		}
 	}

@@ -60,22 +60,21 @@ int ParseSDT_Section(TS_SDT_T *pstTS_SDT, unsigned char *pucSectionBuffer)
 
 	for (iSectionPostion = 11; iSectionPostion < iSDT_SectionLength - 4; iSectionPostion += 5)
 	{
-		pstTS_SDT->stSDT_info[iServiceCount].uiService_id = (pucSectionBuffer[iSectionPostion] << 8) | pucSectionBuffer[1 + iSectionPostion];
-		pstTS_SDT->stSDT_info[iServiceCount].uiReserved_future_use_third = pucSectionBuffer[2 + iSectionPostion] >> 2;
-		pstTS_SDT->stSDT_info[iServiceCount].uiEIT_schedule_flag = (pucSectionBuffer[2 + iSectionPostion] >> 1) & 0x01;
-		pstTS_SDT->stSDT_info[iServiceCount].uiEIT_present_following_flag = pucSectionBuffer[2 + iSectionPostion] & 0x01;
-		pstTS_SDT->stSDT_info[iServiceCount].uiRunning_status = pucSectionBuffer[3 + iSectionPostion] >> 5;
-		pstTS_SDT->stSDT_info[iServiceCount].uiFree_CA_mode = (pucSectionBuffer[3 + iSectionPostion] >> 4) & 0x01;
-		pstTS_SDT->stSDT_info[iServiceCount].uiDescriptor_loop_length = ((pucSectionBuffer[3 + iSectionPostion] & 0x0f) << 8) | pucSectionBuffer[4 + iSectionPostion];
-		if (pstTS_SDT->stSDT_info[iServiceCount].uiDescriptor_loop_length > 0)
+		pstTS_SDT->astSDT_info[iServiceCount].uiService_id = (pucSectionBuffer[iSectionPostion] << 8) | pucSectionBuffer[1 + iSectionPostion];
+		pstTS_SDT->astSDT_info[iServiceCount].uiReserved_future_use = pucSectionBuffer[2 + iSectionPostion] >> 2;
+		pstTS_SDT->astSDT_info[iServiceCount].uiEIT_schedule_flag = (pucSectionBuffer[2 + iSectionPostion] >> 1) & 0x01;
+		pstTS_SDT->astSDT_info[iServiceCount].uiEIT_present_following_flag = pucSectionBuffer[2 + iSectionPostion] & 0x01;
+		pstTS_SDT->astSDT_info[iServiceCount].uiRunning_status = pucSectionBuffer[3 + iSectionPostion] >> 5;
+		pstTS_SDT->astSDT_info[iServiceCount].uiFree_CA_mode = (pucSectionBuffer[3 + iSectionPostion] >> 4) & 0x01;
+		pstTS_SDT->astSDT_info[iServiceCount].uiDescriptor_loop_length = ((pucSectionBuffer[3 + iSectionPostion] & 0x0f) << 8) | pucSectionBuffer[4 + iSectionPostion];
+		if (pstTS_SDT->astSDT_info[iServiceCount].uiDescriptor_loop_length > 0)
 		{
-			memcpy(pstTS_SDT->stSDT_info[iServiceCount].aucDescriptor, pucSectionBuffer + iSectionPostion + 5, pstTS_SDT->stSDT_info[iServiceCount].uiDescriptor_loop_length);
-			iSectionPostion += pstTS_SDT->stSDT_info[iServiceCount].uiDescriptor_loop_length;
+			memcpy(pstTS_SDT->astSDT_info[iServiceCount].aucDescriptor, pucSectionBuffer + iSectionPostion + 5, pstTS_SDT->astSDT_info[iServiceCount].uiDescriptor_loop_length);
+			iSectionPostion += pstTS_SDT->astSDT_info[iServiceCount].uiDescriptor_loop_length;
 		}
 		
 		iServiceCount++;
 	}
-
 	return iServiceCount;
 }
 
@@ -103,22 +102,21 @@ void PrintSDT(TS_SDT_T *pstTS_SDT, int iServiceCount)
 	DUBUGPRINTF("SDT.Original_network_id: 0x%02x\n", pstTS_SDT->uiOriginal_network_id);
 	DUBUGPRINTF("SDT.Reserved_future_use_second: 0x%02x\n", pstTS_SDT->uiReserved_future_use_second);
 	DUBUGPRINTF("SDT.CRC_32: 0x%08lx\n", pstTS_SDT->uiCRC_32);
-	
 	for (iServiceLoopTime = 0; iServiceLoopTime < iServiceCount; iServiceLoopTime++)
 	{
-		DUBUGPRINTF("SDT.SDT_info[%d].Service_id: 0x%02x\n", iServiceLoopTime, pstTS_SDT->stSDT_info[iServiceLoopTime].uiService_id);
-		DUBUGPRINTF("SDT.SDT_info[%d].Reserved_future_use_third: 0x%02x\n", iServiceLoopTime, pstTS_SDT->stSDT_info[iServiceLoopTime].uiReserved_future_use_third);
-		DUBUGPRINTF("SDT.SDT_info[%d].EIT_schedule_flag: 0x%02x\n", iServiceLoopTime, pstTS_SDT->stSDT_info[iServiceLoopTime].uiEIT_schedule_flag);
-		DUBUGPRINTF("SDT.SDT_info[%d].EIT_present_following_flag: 0x%02x\n", iServiceLoopTime, pstTS_SDT->stSDT_info[iServiceLoopTime].uiEIT_present_following_flag);
-		DUBUGPRINTF("SDT.SDT_info[%d].Running_status: 0x%02x\n", iServiceLoopTime, pstTS_SDT->stSDT_info[iServiceLoopTime].uiRunning_status);
-		DUBUGPRINTF("SDT.SDT_info[%d].Free_CA_mode: 0x%02x\n", iServiceLoopTime, pstTS_SDT->stSDT_info[iServiceLoopTime].uiFree_CA_mode);
-		DUBUGPRINTF("SDT.SDT_info[%d].Descriptor_loop_length: 0x%02x\n", iServiceLoopTime, pstTS_SDT->stSDT_info[iServiceLoopTime].uiDescriptor_loop_length);
+		DUBUGPRINTF("SDT.SDT_info[%d].Service_id: 0x%02x\n", iServiceLoopTime, pstTS_SDT->astSDT_info[iServiceLoopTime].uiService_id);
+		DUBUGPRINTF("SDT.SDT_info[%d].Reserved_future_use_third: 0x%02x\n", iServiceLoopTime, pstTS_SDT->astSDT_info[iServiceLoopTime].uiReserved_future_use);
+		DUBUGPRINTF("SDT.SDT_info[%d].EIT_schedule_flag: 0x%02x\n", iServiceLoopTime, pstTS_SDT->astSDT_info[iServiceLoopTime].uiEIT_schedule_flag);
+		DUBUGPRINTF("SDT.SDT_info[%d].EIT_present_following_flag: 0x%02x\n", iServiceLoopTime, pstTS_SDT->astSDT_info[iServiceLoopTime].uiEIT_present_following_flag);
+		DUBUGPRINTF("SDT.SDT_info[%d].Running_status: 0x%02x\n", iServiceLoopTime, pstTS_SDT->astSDT_info[iServiceLoopTime].uiRunning_status);
+		DUBUGPRINTF("SDT.SDT_info[%d].Free_CA_mode: 0x%02x\n", iServiceLoopTime, pstTS_SDT->astSDT_info[iServiceLoopTime].uiFree_CA_mode);
+		DUBUGPRINTF("SDT.SDT_info[%d].Descriptor_loop_length: 0x%02x\n", iServiceLoopTime, pstTS_SDT->astSDT_info[iServiceLoopTime].uiDescriptor_loop_length);
 
-		if (pstTS_SDT->stSDT_info[iServiceLoopTime].uiDescriptor_loop_length > 0)
+		if (pstTS_SDT->astSDT_info[iServiceLoopTime].uiDescriptor_loop_length > 0)
 		{
 			memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 			sprintf(acOutputPrefix, "SDT.SDT_info[%d].", iServiceLoopTime);
-			ParseAndPrintDescriptor(pstTS_SDT->stSDT_info[iServiceLoopTime].aucDescriptor, pstTS_SDT->stSDT_info[iServiceLoopTime].uiDescriptor_loop_length, acOutputPrefix);
+			ParseAndPrintDescriptor(pstTS_SDT->astSDT_info[iServiceLoopTime].aucDescriptor, pstTS_SDT->astSDT_info[iServiceLoopTime].uiDescriptor_loop_length, acOutputPrefix);
 		}
 	}
 }
@@ -162,10 +160,9 @@ int IsSDTSectionGetBefore(unsigned char *pucSectionBuffer, SDT_IDENTIFICATION_IN
  * 从TS流中解析SDT表
  *
  ******************************************/
-int ParseSDT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
+int ParseSDT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_SDT_T *pstTS_SDT, int *piSdtInfoCount)
 {
 	DUBUGPRINTF("\n\n=================================ParseSDT_Table Start================================= \n");
-	TS_SDT_T stTS_SDT = { 0 };
 	int iTemp = 0;
 	int iServiceCount = 0;
 	unsigned char ucSectionBuffer[SECTION_MAX_LENGTH_4096] = { 0 };
@@ -189,10 +186,14 @@ int ParseSDT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 				fseek(pfTsFile, 0 - iTsLength, SEEK_CUR);
 				break;
 			case 1:
-				if (0 == IsSDTSectionGetBefore(ucSectionBuffer, ast_SDT_identification, &iSDTCount, &stTS_SDT))
+				if (0 == IsSDTSectionGetBefore(ucSectionBuffer, ast_SDT_identification, &iSDTCount, pstTS_SDT))
 				{
-					iServiceCount = ParseSDT_Section(&stTS_SDT, ucSectionBuffer);
-					PrintSDT(&stTS_SDT, iServiceCount);
+					iServiceCount = ParseSDT_Section(pstTS_SDT, ucSectionBuffer);
+					*piSdtInfoCount = iServiceCount;
+					if (1 == PRINTFSDT_INFO)
+					{
+						PrintSDT(pstTS_SDT, iServiceCount);
+					}
 				}
 				break;
 			case 2:

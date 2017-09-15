@@ -17,6 +17,7 @@
 #define PRINTFPMT_INFO 0
 #define PRINTFTDT_INFO 0
 #define PRINTFTOT_INFO 0
+#define PRINTFSDT_INFO 0
 #define LOGPRINTF
 
 #ifdef DEBUG

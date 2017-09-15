@@ -7,7 +7,7 @@
 typedef struct SDT_INFO_T
 {
 	unsigned int uiService_id :16;
-	unsigned int uiReserved_future_use_third :6;
+	unsigned int uiReserved_future_use :6;
 	unsigned int uiEIT_schedule_flag :1;
 	unsigned int uiEIT_present_following_flag :1;
 	unsigned int uiRunning_status :3;
@@ -40,9 +40,9 @@ typedef struct TS_SDT_T
 	unsigned int uiLast_section_number :8;
 	unsigned int uiOriginal_network_id :16;
 	unsigned int uiReserved_future_use_second :8;
-	SDT_INFO_T stSDT_info[SDT_INFO_COUNT_MAX];
+	SDT_INFO_T astSDT_info[SDT_INFO_COUNT_MAX];
 	unsigned long uiCRC_32 :32;
 } TS_SDT_T;
 
-int ParseSDT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength);
+int ParseSDT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_SDT_T *pstTS_SDT, int *piSdtInfoCount);
 #endif

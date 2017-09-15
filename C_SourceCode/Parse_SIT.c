@@ -15,14 +15,13 @@
 
 /******************************************
  *
- * 解析SIT段信息
+ * 解析SIT段头部信息
  *
  ******************************************/
-
-void ParseSIT_Section(TS_SIT_T *pstTS_SIT, unsigned char *pucSectionBuffer)
+void ParseSIT_SectionHead(TS_SIT_T *pstTS_SIT, unsigned char *pucSectionBuffer)
 {
 	int iSIT_sectionLength = 0;
-	pstTS_SIT->uitable_id = pucSectionBuffer[0];
+	pstTS_SIT->uiTable_id = pucSectionBuffer[0];
 	pstTS_SIT->uiSection_syntax_indicator = pucSectionBuffer[1] >> 7;
 	pstTS_SIT->uiDVB_Reserved_future_use_first = (pucSectionBuffer[1] >> 6) & 0x01;
 	pstTS_SIT->uiISO_Reserved_first = (pucSectionBuffer[1] >> 4) & 0x03;
@@ -45,7 +44,34 @@ void ParseSIT_Section(TS_SIT_T *pstTS_SIT, unsigned char *pucSectionBuffer)
 
 /******************************************
  *
- *输出SIT信息
+ * 解析SIT段信息
+ *
+ ******************************************/
+void ParseSIT_Section(TS_SIT_T *pstTS_SIT, unsigned char *pucSectionBuffer)
+{
+	int iSIT_sectionLength = 0;
+	int iBufferPosition = 0;
+	int iInfoCount = 0;
+	ParseSIT_SectionHead(pstTS_SIT, pucSectionBuffer);
+	iSIT_sectionLength = 3 + pstTS_SIT->uiSection_length;
+
+	for (iBufferPosition = pstTS_SIT->uiSection_length + 10; iBufferPosition < iSIT_sectionLength - 4; iSIT_sectionLength++)
+	{
+		pstTS_SIT->astSIT_info[iInfoCount].uiService_id = (pucSectionBuffer[iBufferPosition] << 8) | pucSectionBuffer[iBufferPosition + 1];
+		pstTS_SIT->astSIT_info[iInfoCount].uiDVB_reserved_future_use = pucSectionBuffer[iBufferPosition + 2] >> 7;
+		pstTS_SIT->astSIT_info[iInfoCount].uiRunning_status = (pucSectionBuffer[iBufferPosition + 2] >> 4) & 0x7;
+		pstTS_SIT->astSIT_info[iInfoCount].uiService_loop_length = ((pucSectionBuffer[iBufferPosition + 2] & 0x0f) << 8) | pucSectionBuffer[iBufferPosition + 3];
+		if (pstTS_SIT->astSIT_info[iInfoCount].uiService_loop_length > 0)
+		{
+			memcpy(pstTS_SIT->astSIT_info[iInfoCount].aucDescriptor, pucSectionBuffer + iBufferPosition + 4, pstTS_SIT->astSIT_info[iInfoCount].uiService_loop_length);
+		}
+		iBufferPosition += pstTS_SIT->astSIT_info[iInfoCount].uiService_loop_length;
+	}
+}
+
+/******************************************
+ *
+ * 输出SIT信息
  *
  ******************************************/
 void PrintSIT(TS_SIT_T *pstTS_SIT)
@@ -53,7 +79,7 @@ void PrintSIT(TS_SIT_T *pstTS_SIT)
 	char acOutputPrefix[OUTPUT_PREFIX_SIZE] = { 0 };
 	DUBUGPRINTF("\n-------------SIT info SITart-------------\n");
 
-	DUBUGPRINTF("SIT->table_id: %02x\n", pstTS_SIT->uitable_id);
+	DUBUGPRINTF("SIT->table_id: %02x\n", pstTS_SIT->uiTable_id);
 	DUBUGPRINTF("SIT->Section_syntax_indicator: %02x\n", pstTS_SIT->uiSection_syntax_indicator);
 	DUBUGPRINTF("SIT->DVB_Reserved_future_use_first: %02x\n", pstTS_SIT->uiDVB_Reserved_future_use_first);
 	DUBUGPRINTF("SIT->ISO_Reserved_first: %02x\n", pstTS_SIT->uiISO_Reserved_first);
@@ -79,7 +105,7 @@ void PrintSIT(TS_SIT_T *pstTS_SIT)
 
 /******************************************
  *
- *从流中解析SIT信息
+ * 从流中解析SIT信息
  *
  ******************************************/
 int ParseSIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
@@ -96,7 +122,7 @@ int ParseSIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 		DUBUGPRINTF("Parse SIT error\n");
 		return -1;
 	}
-	
+
 	while (!feof(pfTsFile))
 	{
 		iTemp = GetOneSection(pfTsFile, iTsLength, ucSectionBuffer, SIT_PID, SIT_TABLE_ID, &uiVersion);

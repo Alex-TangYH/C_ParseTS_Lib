@@ -19,7 +19,7 @@
 
 void ParseST_Section(TS_ST_T *pstTS_ST, unsigned char *pucSectionBuffer)
 {
-	pstTS_ST->uitable_id = pucSectionBuffer[0];
+	pstTS_ST->uiTable_id = pucSectionBuffer[0];
 	pstTS_ST->uiSection_syntax_indicator = pucSectionBuffer[1] >> 7;
 	pstTS_ST->uiReserved_future_use = (pucSectionBuffer[1] >> 6) & 0x01;
 	pstTS_ST->uiReserved = (pucSectionBuffer[1] >> 4) & 0x03;
@@ -38,7 +38,7 @@ void ParseST_Section(TS_ST_T *pstTS_ST, unsigned char *pucSectionBuffer)
 void PrintST(TS_ST_T *pstTS_ST)
 {
 	DUBUGPRINTF("\n-------------ST info start-------------\n");
-	DUBUGPRINTF("ST->table_id: %02x\n", pstTS_ST->uitable_id);
+	DUBUGPRINTF("ST->table_id: %02x\n", pstTS_ST->uiTable_id);
 	DUBUGPRINTF("ST->uiSection_syntax_indicator: %02x\n", pstTS_ST->uiSection_syntax_indicator);
 	DUBUGPRINTF("ST->uiReserved_future_use_fiST: %02x\n", pstTS_ST->uiReserved_future_use);
 	DUBUGPRINTF("ST->uiReserved: %02x\n", pstTS_ST->uiReserved);

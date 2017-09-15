@@ -21,9 +21,9 @@ int ParseRST_Section(TS_RST_T *pstTS_RST, unsigned char *pucSectionBuffer)
 {
 	int iLoopPosition = 0;
 	int iLoopCount = 0;
-	pstTS_RST->uitable_id = pucSectionBuffer[0];
+	pstTS_RST->uiTable_id = pucSectionBuffer[0];
 	pstTS_RST->uiSection_syntax_indicator = pucSectionBuffer[1] >> 7;
-	pstTS_RST->uiReserved_future_use_first = (pucSectionBuffer[1] >> 6) & 0x01;
+	pstTS_RST->uiReserved_future_use = (pucSectionBuffer[1] >> 6) & 0x01;
 	pstTS_RST->uiReserved = (pucSectionBuffer[1] >> 4) & 0x03;
 	pstTS_RST->uiSection_length = ((pucSectionBuffer[1] & 0x0f) << 8) | pucSectionBuffer[2];
 
@@ -35,7 +35,7 @@ int ParseRST_Section(TS_RST_T *pstTS_RST, unsigned char *pucSectionBuffer)
 			pstTS_RST->astRST_info[iLoopCount].uiOriginal_network_id = (pucSectionBuffer[2] << 8) | pucSectionBuffer[3];
 			pstTS_RST->astRST_info[iLoopCount].uiService_id = (pucSectionBuffer[4] << 8) | pucSectionBuffer[5];
 			pstTS_RST->astRST_info[iLoopCount].uiEvent_id = (pucSectionBuffer[6] << 8) | pucSectionBuffer[7];
-			pstTS_RST->astRST_info[iLoopCount].uiReserved_future_use_second = pucSectionBuffer[8] >> 3;
+			pstTS_RST->astRST_info[iLoopCount].uiReserved_future_use = pucSectionBuffer[8] >> 3;
 			pstTS_RST->astRST_info[iLoopCount].uiRunning_status = pucSectionBuffer[8] & 0x07;
 			iLoopCount++;
 		}
@@ -54,9 +54,9 @@ void PrintRST(TS_RST_T *pstTS_RST, int iRST_LoopCount)
 	int iLoopTime = 0;
 	DUBUGPRINTF("\n-------------RST info start-------------\n");
 
-	DUBUGPRINTF("RST->table_id: %02x\n", pstTS_RST->uitable_id);
+	DUBUGPRINTF("RST->table_id: %02x\n", pstTS_RST->uiTable_id);
 	DUBUGPRINTF("RST->uiSection_syntax_indicator: %02x\n", pstTS_RST->uiSection_syntax_indicator);
-	DUBUGPRINTF("RST->uiReserved_future_use_first: %02x\n", pstTS_RST->uiReserved_future_use_first);
+	DUBUGPRINTF("RST->uiReserved_future_use_first: %02x\n", pstTS_RST->uiReserved_future_use);
 	DUBUGPRINTF("RST->uiReserved: %02x\n", pstTS_RST->uiReserved);
 	DUBUGPRINTF("RST->uiSection_length: %02x\n", pstTS_RST->uiSection_length);
 	if (pstTS_RST->uiSection_length > 0)
@@ -67,7 +67,7 @@ void PrintRST(TS_RST_T *pstTS_RST, int iRST_LoopCount)
 			DUBUGPRINTF("RST->RST_info[%d].uiOriginal_network_id: %02x\n", iLoopTime, pstTS_RST->astRST_info[iLoopTime].uiOriginal_network_id);
 			DUBUGPRINTF("RST->RST_info[%d].uiService_id: %02x\n", iLoopTime, pstTS_RST->astRST_info[iLoopTime].uiService_id);
 			DUBUGPRINTF("RST->RST_info[%d].uiEvent_id: %02x\n", iLoopTime, pstTS_RST->astRST_info[iLoopTime].uiEvent_id);
-			DUBUGPRINTF("RST->RST_info[%d].uiReserved_future_use_second: %02x\n", iLoopTime, pstTS_RST->astRST_info[iLoopTime].uiReserved_future_use_second);
+			DUBUGPRINTF("RST->RST_info[%d].uiReserved_future_use_second: %02x\n", iLoopTime, pstTS_RST->astRST_info[iLoopTime].uiReserved_future_use);
 			DUBUGPRINTF("RST->RST_info[%d].uiRunning_status: %02x\n", iLoopTime, pstTS_RST->astRST_info[iLoopTime].uiRunning_status);
 		}
 	}

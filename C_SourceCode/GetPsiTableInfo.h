@@ -13,7 +13,9 @@
 #include "Parse_PMT.h"
 #include "Parse_TDT.h"
 #include "Parse_TOT.h"
+#include "Parse_SDT.h"
 
+int GetSDTTable(FILE *pfTsFile, TS_SDT_T *pstSDT, int *piSdtInfoCount);
 int GetTOTTable(FILE *pfTsFile, TS_TOT_T *pstTOT);
 int GetTDTTable(FILE *pfTsFile, TS_TDT_T *pstTDT);
 int GetPatTable(FILE *pfTsFile, TS_PAT_T *pstPat);

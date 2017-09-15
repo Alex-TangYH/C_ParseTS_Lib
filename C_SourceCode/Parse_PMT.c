@@ -120,7 +120,7 @@ void GetPMT_Info(TS_PMT_T *pstTS_PMT, int iStreamCount, PMT_INFO_T *pstPMT_Info,
 		if ((0x04 == uiStreamType) || (0x03 == uiStreamType) || (0x0f == uiStreamType) || (0x11 == uiStreamType))
 		{
 			DUBUGPRINTF("Enter get audio\n");
-			pstPMT_Info->uiAudioPID[*iVideoCount] = uiElementrayPID;
+			pstPMT_Info->auiAudioPID[*iVideoCount] = uiElementrayPID;
 			(*iVideoCount)++;
 		}
 

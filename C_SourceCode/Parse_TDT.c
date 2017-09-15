@@ -15,7 +15,7 @@
 void ParseTDT_Section(TS_TDT_T *pstTS_TDT, unsigned char *pucSectionBuffer)
 {
 	int iUTC_timePosition = 0;
-	pstTS_TDT->uitable_id = pucSectionBuffer[0];
+	pstTS_TDT->uiTable_id = pucSectionBuffer[0];
 	pstTS_TDT->uiSection_syntax_indicator = pucSectionBuffer[1] >> 7;
 	pstTS_TDT->uiReserved_future_use = (pucSectionBuffer[1] >> 6) & 0x01;
 	pstTS_TDT->uiReserved = (pucSectionBuffer[1] >> 4) & 0x03;
@@ -34,7 +34,7 @@ void ParseTDT_Section(TS_TDT_T *pstTS_TDT, unsigned char *pucSectionBuffer)
 void PrintTDT(TS_TDT_T *pstTS_TDT)
 {
 	DUBUGPRINTF("\n-------------TDT info start-------------\n");
-	DUBUGPRINTF("TDT->table_id: 0x%02x\n", pstTS_TDT->uitable_id);
+	DUBUGPRINTF("TDT->table_id: 0x%02x\n", pstTS_TDT->uiTable_id);
 	DUBUGPRINTF("TDT->Section_syntax_indicator: 0x%02x\n", pstTS_TDT->uiSection_syntax_indicator);
 	DUBUGPRINTF("TDT->Reserved_future_use: 0x%02x\n", pstTS_TDT->uiReserved_future_use);
 	DUBUGPRINTF("TDT->Reserved: 0x%02x\n", pstTS_TDT->uiReserved);

@@ -3,7 +3,7 @@
 
 typedef struct TS_DIT_T
 {
-	unsigned int uitable_id :8;
+	unsigned int uiTable_id :8;
 	unsigned int uiSection_syntax_indicator :1;
 	unsigned int uiReserved_future_use_first :1;
 	unsigned int uiReserved :2;

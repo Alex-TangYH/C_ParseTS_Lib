@@ -19,7 +19,7 @@
 
 void ParseDIT_Section(TS_DIT_T *pstTS_DIT, unsigned char *pucSectionBuffer)
 {
-	pstTS_DIT->uitable_id = pucSectionBuffer[0];
+	pstTS_DIT->uiTable_id = pucSectionBuffer[0];
 	pstTS_DIT->uiSection_syntax_indicator = pucSectionBuffer[1] >> 7;
 	pstTS_DIT->uiReserved_future_use_first = (pucSectionBuffer[1] >> 6) & 0x01;
 	pstTS_DIT->uiReserved = (pucSectionBuffer[1] >> 4) & 0x03;
@@ -36,7 +36,7 @@ void ParseDIT_Section(TS_DIT_T *pstTS_DIT, unsigned char *pucSectionBuffer)
 void PrintDIT(TS_DIT_T *pstTS_DIT)
 {
 	DUBUGPRINTF("\n-------------DIT info DITart-------------\n");
-	DUBUGPRINTF("DIT->table_id: %02x\n", pstTS_DIT->uitable_id);
+	DUBUGPRINTF("DIT->table_id: %02x\n", pstTS_DIT->uiTable_id);
 	DUBUGPRINTF("DIT->Section_syntax_indicator: %02x\n", pstTS_DIT->uiSection_syntax_indicator);
 	DUBUGPRINTF("DIT->Reserved_future_use_first: %02x\n", pstTS_DIT->uiReserved_future_use_first);
 	DUBUGPRINTF("DIT->Reserved: %02x\n", pstTS_DIT->uiReserved);
