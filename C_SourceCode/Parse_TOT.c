@@ -104,7 +104,7 @@ int ParseTOT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_TOT_T *pst
 				break;
 			case -1:
 				DUBUGPRINTF("\n=================================ParseTOT_Table END=================================== \n\n");
-				return 1;
+				return -1;
 				break;
 			default:
 				LOG("ParseTOT_Table switch (iTemp) default\n");

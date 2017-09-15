@@ -189,11 +189,13 @@ int ParseSDT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_SDT_T *pst
 				if (0 == IsSDTSectionGetBefore(ucSectionBuffer, ast_SDT_identification, &iSDTCount, pstTS_SDT))
 				{
 					iServiceCount = ParseSDT_Section(pstTS_SDT, ucSectionBuffer);
+					printf("pstSDT->astSDT_info[0].uiService_id: %d \n", pstTS_SDT->astSDT_info[0].uiService_id);
 					*piSdtInfoCount = iServiceCount;
 					if (1 == PRINTFSDT_INFO)
 					{
 						PrintSDT(pstTS_SDT, iServiceCount);
 					}
+					return 1;
 				}
 				break;
 			case 2:
@@ -207,6 +209,6 @@ int ParseSDT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_SDT_T *pst
 		}
 	}
 	DUBUGPRINTF("\n\n=================================ParseSDT_Table end================================= \n");
-	return 0;
+	return -1;
 }
 

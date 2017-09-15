@@ -202,7 +202,7 @@ int ParsePAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, PAT_INFO_T *p
 				break;
 		}
 	}
-	DUBUGPRINTF("return 0\n");
+	DUBUGPRINTF("return -1\n");
 	DUBUGPRINTF("\n=================================ParsePAT_Table End===================================\n\n");
-	return 0;
+	return -1;
 }

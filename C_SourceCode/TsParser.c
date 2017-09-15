@@ -111,6 +111,7 @@ int ParseTransportStream(FILE *pfTsFile)
 	TS_SDT_T stTS_SDT = { 0 };
 	TS_ST_T stTS_ST = { 0 };
 	TS_DIT_T stTS_DIT = { 0 };
+	TS_RST_T stTS_RST = { 0 };
 	int nitTransportStreamDescriptorCount = 0;
 	int iSdtInfoCount = 0;
 
@@ -189,7 +190,7 @@ int ParseTransportStream(FILE *pfTsFile)
 		//return -1;
 	}
 
-	if (-1 == ParseRST_Table(pfTsFile, iTsPosition, iTsLength))
+	if (-1 == ParseRST_Table(pfTsFile, iTsPosition, iTsLength, &stTS_RST))
 	{
 		//return -1;
 	}

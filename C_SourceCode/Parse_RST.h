@@ -23,5 +23,5 @@ typedef struct TS_RST_T
 	RST_INFO_T astRST_info[TS_RST_INFO_MAX];
 } TS_RST_T;
 
-int ParseRST_Table(FILE *pfTsFile, int iTsPosition, int iTsLength);
+int ParseRST_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_RST_T *pstRST);
 #endif

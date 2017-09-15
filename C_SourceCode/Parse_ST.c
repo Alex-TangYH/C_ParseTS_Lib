@@ -86,6 +86,7 @@ int ParseST_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_ST_T *pstTS
 					{
 						PrintST(pstTS_ST);
 					}
+					return 1;
 				}
 				if (1 == IsAllSectionOver(ucSectionBuffer, uiRecordGetSection))
 				{

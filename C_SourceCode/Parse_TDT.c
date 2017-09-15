@@ -102,7 +102,7 @@ int ParseTDT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_TDT_T *pst
 				return 1;
 				break;
 			case -1:
-				return 1;
+				return -1;
 				break;
 			default:
 				LOG("ParseTDT_Table switch (iTemp) default\n");

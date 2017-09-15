@@ -353,7 +353,7 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 	{
 		TS_SDT_T stSdt = { 0 };
 		int count = 0;
-		int resultOfGetTable = GetSDTTable(pfTsFile, &stSdt, &count);
+		int resultOfGetTable = GetSdtTable(pfTsFile, &stSdt, &count);
 		if (-1 == resultOfGetTable)
 		{
 			LOG("no sdt\n");
@@ -370,7 +370,6 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 			for (iLoopIndex = 0; iLoopIndex < count; iLoopIndex++)
 			{
 				SDT_INFO_T stSdtInfo = stSdt.astSDT_info[iLoopIndex];
-				printf("==================stSdtInfo.uiService_id : %d================== \n", stSdtInfo.uiService_id);
 				int iDescriptorCount = GetDescriptorCountInBuffer(stSdtInfo.aucDescriptor, stSdtInfo.uiDescriptor_loop_length);
 				jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
 				ParseDescriptorToJArray(env, &descriptorBeanArray, stSdtInfo.aucDescriptor, stSdtInfo.uiDescriptor_loop_length);
@@ -452,6 +451,51 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 			jmethodID ditConstrocMID = (*env)->GetMethodID(env, ditBeanClass, "<init>", "(IIIIIII)V");
 			jobject stBean = (*env)->NewObject(env, ditBeanClass, ditConstrocMID, stDit.uiTable_id, stDit.uiSection_syntax_indicator, stDit.uiReserved_future_use_first, stDit.uiReserved, stDit.uiSection_length, stDit.uiTransition_flag,
 					stDit.uiReserved_future_use_second);
+			return stBean;
+		}
+	}
+}
+
+/******************************************
+ *
+ * ½âÎöRST
+ *
+ ******************************************/
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseRST(JNIEnv *env, jclass obj, jstring filePath)
+{
+	char *pcFilePath = Jstring2CharPointer(env, filePath);
+	FILE *pfTsFile = GetFilePointer(pcFilePath);
+
+	if (pfTsFile == NULL)
+	{
+		return NULL;
+	}
+	else
+	{
+		TS_RST_T stRst = { 0 };
+		int resultOfGetTable = GetDitTable(pfTsFile, &stRst); //
+		if (-1 == resultOfGetTable)
+		{
+			LOG("no rst\n");
+			return NULL;
+		}
+		else
+		{
+			int iLoopIndex = 0;
+			int iInfoCount = stRst.uiSection_length / 9;
+			jclass rstInfoBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/si/RstInfo");
+			jmethodID rstInfoBeanConstrocMID = (*env)->GetMethodID(env, rstInfoBeanClass, "<init>", "(IIIIII)V");
+			jobjectArray rstInfoBeanArray = (*env)->NewObjectArray(env, iInfoCount, rstInfoBeanClass, NULL);
+			for (iLoopIndex = 0; iLoopIndex < iInfoCount; iInfoCount++)
+			{
+				jobject rstInfoBean = (*env)->NewObject(env, rstInfoBeanClass, rstInfoBeanConstrocMID, stRst.astRST_info[iLoopIndex].uiTransport_stream_id, stRst.astRST_info[iLoopIndex].uiOriginal_network_id, stRst.astRST_info[iLoopIndex].uiService_id,
+						stRst.astRST_info[iLoopIndex].uiEvent_id, stRst.astRST_info[iLoopIndex].uiReserved_future_use, stRst.astRST_info[iLoopIndex].uiRunning_status);
+				(*env)->SetObjectArrayElement(env, rstInfoBeanArray, iLoopIndex, rstInfoBean);
+			}
+
+			jclass rstBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/si/RST_Table");
+			jmethodID rstConstrocMID = (*env)->GetMethodID(env, rstBeanClass, "<init>", "(IIIII[Lcom/alex/ts_parser/bean/si/RstInfo)V");
+			jobject stBean = (*env)->NewObject(env, rstBeanClass, rstConstrocMID, stRst.uiTable_id, stRst.uiSection_syntax_indicator, stRst.uiReserved_future_use, stRst.uiReserved, stRst.uiSection_length, rstInfoBeanArray);
 			return stBean;
 		}
 	}

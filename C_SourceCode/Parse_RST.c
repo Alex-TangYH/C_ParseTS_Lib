@@ -80,12 +80,11 @@ void PrintRST(TS_RST_T *pstTS_RST, int iRST_LoopCount)
  *从流中解析RST信息
  *
  ******************************************/
-int ParseRST_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
+int ParseRST_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_RST_T *pstTS_RST)
 {
 	DUBUGPRINTF("\n\n=================================ParseRST_Table Start================================= \n");
 	int iTemp = 0;
 	int iRST_LoopCount = 0;
-	TS_RST_T stTS_RST = { 0 };
 	unsigned int uiVersion = INITIAL_VERSION;
 	unsigned char ucSectionBuffer[SECTION_MAX_LENGTH_4092] = { 0 };
 	unsigned int uiRecordGetSection[SECTION_COUNT_256] = { 0 };
@@ -109,8 +108,8 @@ int ParseRST_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 			case 1:
 				if (0 == IsSectionGetBefore(ucSectionBuffer, uiRecordGetSection))
 				{
-					iRST_LoopCount = ParseRST_Section(&stTS_RST, ucSectionBuffer);
-					PrintRST(&stTS_RST, iRST_LoopCount);
+					iRST_LoopCount = ParseRST_Section(pstTS_RST, ucSectionBuffer);
+					PrintRST(pstTS_RST, iRST_LoopCount);
 				}
 				if (1 == IsAllSectionOver(ucSectionBuffer, uiRecordGetSection))
 				{

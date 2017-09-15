@@ -16,10 +16,12 @@
 #include "Parse_SDT.h"
 #include "Parse_ST.h"
 #include "Parse_DIT.h"
+#include "Parse_RST.h"
 
+int GetRstTable(FILE *pfTsFile, TS_RST_T *pstRST);
 int GetDitTable(FILE *pfTsFile, TS_DIT_T *pstDIT);
 int GetStTable(FILE *pfTsFile, TS_ST_T *pstST);
-int GetSDTTable(FILE *pfTsFile, TS_SDT_T *pstSDT, int *piSdtInfoCount);
+int GetSdtTable(FILE *pfTsFile, TS_SDT_T *pstSDT, int *piSdtInfoCount);
 int GetTOTTable(FILE *pfTsFile, TS_TOT_T *pstTOT);
 int GetTDTTable(FILE *pfTsFile, TS_TDT_T *pstTDT);
 int GetPatTable(FILE *pfTsFile, TS_PAT_T *pstPat);
