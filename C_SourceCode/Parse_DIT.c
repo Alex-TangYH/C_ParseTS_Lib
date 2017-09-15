@@ -51,11 +51,10 @@ void PrintDIT(TS_DIT_T *pstTS_DIT)
  *从流中解析DIT信息
  *
  ******************************************/
-int ParseDIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
+int ParseDIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_DIT_T *pstTS_DIT)
 {
 	DUBUGPRINTF("\n\n=================================ParseDIT_Table DITart================================= \n");
 	int iTemp = 0;
-	TS_DIT_T stTS_DIT = { 0 };
 	unsigned int uiVersion = INITIAL_VERSION;
 	unsigned char ucSectionBuffer[SECTION_MAX_LENGTH_4096] = { 0 };
 	unsigned int uiRecordGetSection[SECTION_COUNT_256] = { 0 };
@@ -79,8 +78,11 @@ int ParseDIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 			case 1:
 				if (0 == IsSectionGetBefore(ucSectionBuffer, uiRecordGetSection))
 				{
-					ParseDIT_Section(&stTS_DIT, ucSectionBuffer);
-					PrintDIT(&stTS_DIT);
+					ParseDIT_Section(pstTS_DIT, ucSectionBuffer);
+					if (1 == PRINTFDIT_INFO)
+					{
+						PrintDIT(pstTS_DIT);
+					}
 				}
 				if (1 == IsAllSectionOver(ucSectionBuffer, uiRecordGetSection))
 				{
@@ -90,7 +92,7 @@ int ParseDIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 				break;
 			case -1:
 				DUBUGPRINTF("\n\n=================================ParseDIT_Table End================================= \n");
-				return 1;
+				return -1;
 				break;
 			default:
 				LOG("ParseDIT_Table switch (iTemp) default\n");

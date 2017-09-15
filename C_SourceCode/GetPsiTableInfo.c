@@ -140,3 +140,31 @@ int GetSDTTable(FILE *pfTsFile, TS_SDT_T *pstSDT, int *piSdtInfoCount)
 	}
 	return ParseSDT_Table(pfTsFile, iTsPosition, iTsLength, pstSDT, piSdtInfoCount);
 }
+
+//获取ST
+int GetStTable(FILE *pfTsFile, TS_ST_T *pstDIT)
+{
+	int iTsPosition = 0;
+	int iTsLength = 0;
+	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
+	if (-1 == iTsLength)
+	{
+		DUBUGPRINTF("The file is not the transport stream file\n");
+		return -1;
+	}
+	return ParseST_Table(pfTsFile, iTsPosition, iTsLength, pstDIT);
+}
+
+//获取DIT
+int GetDitTable(FILE *pfTsFile, TS_DIT_T *pstDIT)
+{
+	int iTsPosition = 0;
+	int iTsLength = 0;
+	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
+	if (-1 == iTsLength)
+	{
+		DUBUGPRINTF("The file is not the transport stream file\n");
+		return -1;
+	}
+	return ParseDIT_Table(pfTsFile, iTsPosition, iTsLength, pstDIT);
+}

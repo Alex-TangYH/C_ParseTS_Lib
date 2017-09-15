@@ -13,5 +13,5 @@ typedef struct TS_ST_T
 	unsigned char aucST_data[TS_ST_DATA_MAX];
 } TS_ST_T;
 
-int ParseST_Table(FILE *pfTsFile, int iTsPosition, int iTsLength);
+int ParseST_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_ST_T *pstTS_ST);
 #endif

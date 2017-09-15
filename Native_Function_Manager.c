@@ -388,6 +388,75 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 		}
 	}
 }
+
+/******************************************
+ *
+ * 解析ST
+ *
+ ******************************************/
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseST(JNIEnv *env, jclass obj, jstring filePath)
+{
+	char *pcFilePath = Jstring2CharPointer(env, filePath);
+	FILE *pfTsFile = GetFilePointer(pcFilePath);
+
+	if (pfTsFile == NULL)
+	{
+		return NULL;
+	}
+	else
+	{
+		TS_ST_T stSt = { 0 };
+		int resultOfGetTable = GetStTable(pfTsFile, &stSt);
+		if (-1 == resultOfGetTable)
+		{
+			LOG("no st\n");
+			return NULL;
+		}
+		else
+		{
+			jclass stBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/si/ST_Table");
+			jmethodID stConstrocMID = (*env)->GetMethodID(env, stBeanClass, "<init>", "(IIIII[B)V");
+			jbyteArray byteArrayData = GetJByteArrayByUChar(env, stSt.aucST_data, stSt.uiSection_length);
+			jobject stBean = (*env)->NewObject(env, stBeanClass, stConstrocMID, stSt.uiTable_id, stSt.uiSection_syntax_indicator, stSt.uiReserved_future_use, stSt.uiReserved, stSt.uiSection_length, byteArrayData);
+			return stBean;
+		}
+	}
+}
+
+/******************************************
+ *
+ * 解析DIT
+ *
+ ******************************************/
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseDIT(JNIEnv *env, jclass obj, jstring filePath)
+{
+	char *pcFilePath = Jstring2CharPointer(env, filePath);
+	FILE *pfTsFile = GetFilePointer(pcFilePath);
+
+	if (pfTsFile == NULL)
+	{
+		return NULL;
+	}
+	else
+	{
+		TS_DIT_T stDit = { 0 };
+		int resultOfGetTable = GetDitTable(pfTsFile, &stDit);
+		if (-1 == resultOfGetTable)
+		{
+			LOG("no dit\n");
+			return NULL;
+		}
+		else
+		{
+			jclass ditBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/si/DIT_Table");
+			jmethodID ditConstrocMID = (*env)->GetMethodID(env, ditBeanClass, "<init>", "(IIIIIII)V");
+			jobject stBean = (*env)->NewObject(env, ditBeanClass, ditConstrocMID, stDit.uiTable_id, stDit.uiSection_syntax_indicator, stDit.uiReserved_future_use_first, stDit.uiReserved, stDit.uiSection_length, stDit.uiTransition_flag,
+					stDit.uiReserved_future_use_second);
+			return stBean;
+		}
+	}
+}
+
 /******************************************
  *
  * 解析描述流

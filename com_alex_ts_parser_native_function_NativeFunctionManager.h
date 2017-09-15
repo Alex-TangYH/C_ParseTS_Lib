@@ -79,6 +79,54 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseSDT
   (JNIEnv *, jclass, jstring);
 
+/*
+ * Class:     com_alex_ts_parser_native_function_NativeFunctionManager
+ * Method:    parseBAT
+ * Signature: (Ljava/lang/String;)Lcom/alex/ts_parser/bean/si/BAT_Table;
+ */
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseBAT
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     com_alex_ts_parser_native_function_NativeFunctionManager
+ * Method:    parseDIT
+ * Signature: (Ljava/lang/String;)Lcom/alex/ts_parser/bean/si/DIT_Table;
+ */
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseDIT
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     com_alex_ts_parser_native_function_NativeFunctionManager
+ * Method:    parseEIT
+ * Signature: (Ljava/lang/String;)Lcom/alex/ts_parser/bean/si/EIT_Table;
+ */
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseEIT
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     com_alex_ts_parser_native_function_NativeFunctionManager
+ * Method:    parseRST
+ * Signature: (Ljava/lang/String;)Lcom/alex/ts_parser/bean/si/RST_Table;
+ */
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseRST
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     com_alex_ts_parser_native_function_NativeFunctionManager
+ * Method:    parseST
+ * Signature: (Ljava/lang/String;)Lcom/alex/ts_parser/bean/si/ST_Table;
+ */
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseST
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     com_alex_ts_parser_native_function_NativeFunctionManager
+ * Method:    parseSIT
+ * Signature: (Ljava/lang/String;)Lcom/alex/ts_parser/bean/si/SIT_Table;
+ */
+JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseSIT
+  (JNIEnv *, jclass, jstring);
+
 #ifdef __cplusplus
 }
 #endif

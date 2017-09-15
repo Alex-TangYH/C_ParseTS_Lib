@@ -55,11 +55,10 @@ void PrintST(TS_ST_T *pstTS_ST)
  *从流中解析ST信息
  *
  ******************************************/
-int ParseST_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
+int ParseST_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_ST_T *pstTS_ST)
 {
 	DUBUGPRINTF("\n\n=================================ParseST_Table Start================================= \n");
 	int iTemp = 0;
-	TS_ST_T stTS_ST = { 0 };
 	unsigned int uiVersion = INITIAL_VERSION;
 	unsigned char ucSectionBuffer[SECTION_MAX_LENGTH_4092] = { 0 };
 	unsigned int uiRecordGetSection[SECTION_COUNT_256] = { 0 };
@@ -82,8 +81,11 @@ int ParseST_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 			case 1:
 				if (0 == IsSectionGetBefore(ucSectionBuffer, uiRecordGetSection))
 				{
-					ParseST_Section(&stTS_ST, ucSectionBuffer);
-					PrintST(&stTS_ST);
+					ParseST_Section(pstTS_ST, ucSectionBuffer);
+					if (1 == PRINTFST_INFO)
+					{
+						PrintST(pstTS_ST);
+					}
 				}
 				if (1 == IsAllSectionOver(ucSectionBuffer, uiRecordGetSection))
 				{
@@ -93,7 +95,7 @@ int ParseST_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 				break;
 			case -1:
 				DUBUGPRINTF("\n\n=================================ParseST_Table End================================= \n");
-				return 1;
+				return -1;
 				break;
 			default:
 				LOG("ParseST_Table switch (iTemp) default\n");

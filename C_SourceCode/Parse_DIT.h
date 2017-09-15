@@ -12,5 +12,5 @@ typedef struct TS_DIT_T
 	unsigned int uiReserved_future_use_second :7;
 } TS_DIT_T;
 
-int ParseDIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength);
+int ParseDIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_DIT_T *pstTS_DIT);
 #endif
