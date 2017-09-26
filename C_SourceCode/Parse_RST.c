@@ -109,7 +109,10 @@ int ParseRST_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_RST_T *pst
 				if (0 == IsSectionGetBefore(ucSectionBuffer, uiRecordGetSection))
 				{
 					iRST_LoopCount = ParseRST_Section(pstTS_RST, ucSectionBuffer);
-					PrintRST(pstTS_RST, iRST_LoopCount);
+					if (1 == PRINTFRST_INFO)
+					{
+						PrintRST(pstTS_RST, iRST_LoopCount);
+					}
 				}
 				if (1 == IsAllSectionOver(ucSectionBuffer, uiRecordGetSection))
 				{
@@ -119,7 +122,7 @@ int ParseRST_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_RST_T *pst
 				break;
 			case -1:
 				DUBUGPRINTF("\n\n=================================ParseRST_Table End================================= \n");
-				return 1;
+				return -1;
 				break;
 			default:
 				LOG("ParseRST_Table switch (iTemp) default\n");

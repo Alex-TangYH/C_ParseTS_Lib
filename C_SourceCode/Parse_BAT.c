@@ -87,7 +87,7 @@ void PrintBAT(TS_BAT_T *pstTS_BAT, int iBAT_InfoCount)
 	char acOutputPrefix[OUTPUT_PREFIX_SIZE] = { 0 };
 	
 	DUBUGPRINTF("\n-------------BAT info start-------------\n");
-	
+
 	DUBUGPRINTF("BAT->table_id: 0x%02x\n", pstTS_BAT->uiTable_id);
 	DUBUGPRINTF("BAT->Section_syntax_indicator: 0x%02x\n", pstTS_BAT->uiSection_syntax_indicator);
 	DUBUGPRINTF("BAT->Reserved_future_use_first: 0x%02x\n", pstTS_BAT->uiReserved_future_use_first);
@@ -101,14 +101,12 @@ void PrintBAT(TS_BAT_T *pstTS_BAT, int iBAT_InfoCount)
 	DUBUGPRINTF("BAT->Last_section_number: 0x%02x\n", pstTS_BAT->uiLast_section_number);
 	DUBUGPRINTF("BAT->Reserved_future_use_second: 0x%02x\n", pstTS_BAT->uiReserved_future_use_second);
 	DUBUGPRINTF("BAT->Boquet_descriptor_length: 0x%02x\n", pstTS_BAT->uiBouquet_descriptor_length);
-	
 	if (pstTS_BAT->uiBouquet_descriptor_length > 0)
 	{
 		memset(acOutputPrefix, 0, OUTPUT_PREFIX_SIZE);
 		sprintf(acOutputPrefix, "BAT->");
 		ParseAndPrintDescriptor(pstTS_BAT->aucDescriptor, pstTS_BAT->uiBouquet_descriptor_length, acOutputPrefix);
 	}
-	
 	DUBUGPRINTF("BAT->Reserved_future_use_second: 0x%02x\n", pstTS_BAT->uiReserved_future_use_second);
 	DUBUGPRINTF("BAT->Transport_stream_loop_lenth: 0x%02x\n", pstTS_BAT->uiTransport_stream_loop_length);
 	DUBUGPRINTF("BAT->CRC_32: 0x%08lx\n", pstTS_BAT->uiCRC_32);
@@ -135,12 +133,11 @@ void PrintBAT(TS_BAT_T *pstTS_BAT, int iBAT_InfoCount)
  * 从缓存中解析BAT表
  *
  ******************************************/
-int ParseBAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
+int ParseBAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_BAT_T *pstTS_BAT, int *piBatInfoCount)
 {
 	DUBUGPRINTF("\n\n=================================ParseBAT_Table Start================================= \n");
 	int iTemp = 0;
 	int iBAT_InfoCount = 0;
-	TS_BAT_T stTS_BAT = { 0 };
 	unsigned int uiVersion = INITIAL_VERSION;
 	unsigned char ucSectionBuffer[SECTION_MAX_LENGTH_4092] = { 0 };
 	unsigned int uiRecordGetSection[SECTION_COUNT_256] = { 0 };
@@ -150,7 +147,6 @@ int ParseBAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 		DUBUGPRINTF("Parse BAT error\n");
 		return -1;
 	}
-	
 	while (!feof(pfTsFile))
 	{
 		iTemp = GetOneSection(pfTsFile, iTsLength, ucSectionBuffer, BAT_PID, BAT_TABLE_ID, &uiVersion);
@@ -164,8 +160,12 @@ int ParseBAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 			case 1:
 				if (0 == IsSectionGetBefore(ucSectionBuffer, uiRecordGetSection))
 				{
-					iBAT_InfoCount = ParseBAT_Section(&stTS_BAT, ucSectionBuffer);
-					PrintBAT(&stTS_BAT, iBAT_InfoCount);
+					iBAT_InfoCount = ParseBAT_Section(pstTS_BAT, ucSectionBuffer);
+					*piBatInfoCount = iBAT_InfoCount;
+					if (1 == PRINTFBAT_INFO)
+					{
+						PrintBAT(pstTS_BAT, iBAT_InfoCount);
+					}
 				}
 				if (1 == IsAllSectionOver(ucSectionBuffer, uiRecordGetSection))
 				{
@@ -177,7 +177,7 @@ int ParseBAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 				break;
 			case -1:
 				DUBUGPRINTF("\n=================================ParseBAT_Table END=================================== \n\n");
-				return 1;
+				return -1;
 				break;
 			default:
 				LOG("ParseBAT_Table switch (iTemp) default\n");

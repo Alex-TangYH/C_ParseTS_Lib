@@ -189,7 +189,6 @@ int ParseSDT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_SDT_T *pst
 				if (0 == IsSDTSectionGetBefore(ucSectionBuffer, ast_SDT_identification, &iSDTCount, pstTS_SDT))
 				{
 					iServiceCount = ParseSDT_Section(pstTS_SDT, ucSectionBuffer);
-					printf("pstSDT->astSDT_info[0].uiService_id: %d \n", pstTS_SDT->astSDT_info[0].uiService_id);
 					*piSdtInfoCount = iServiceCount;
 					if (1 == PRINTFSDT_INFO)
 					{
@@ -201,7 +200,7 @@ int ParseSDT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_SDT_T *pst
 			case 2:
 				break;
 			case -1:
-				return 1;
+				return -1;
 				break;
 			default:
 				LOG("ParseSDT_Table switch (iTemp) default\n");

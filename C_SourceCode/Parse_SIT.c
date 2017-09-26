@@ -6,8 +6,8 @@
 #include "Get_Section.h"
 #include "TsParser.h"
 
-#define SIT_PID 0x001E
-#define SIT_TABLE_ID 0x7E
+#define SIT_PID 0x001F
+#define SIT_TABLE_ID 0x7F
 #define INITIAL_VERSION 0xff
 #define SECTION_COUNT_256 256
 #define SECTION_MAX_LENGTH_4 4
@@ -47,7 +47,7 @@ void ParseSIT_SectionHead(TS_SIT_T *pstTS_SIT, unsigned char *pucSectionBuffer)
  * 解析SIT段信息
  *
  ******************************************/
-void ParseSIT_Section(TS_SIT_T *pstTS_SIT, unsigned char *pucSectionBuffer)
+int ParseSIT_Section(TS_SIT_T *pstTS_SIT, unsigned char *pucSectionBuffer)
 {
 	int iSIT_sectionLength = 0;
 	int iBufferPosition = 0;
@@ -67,6 +67,7 @@ void ParseSIT_Section(TS_SIT_T *pstTS_SIT, unsigned char *pucSectionBuffer)
 		}
 		iBufferPosition += pstTS_SIT->astSIT_info[iInfoCount].uiService_loop_length;
 	}
+	return iInfoCount;
 }
 
 /******************************************
@@ -108,11 +109,10 @@ void PrintSIT(TS_SIT_T *pstTS_SIT)
  * 从流中解析SIT信息
  *
  ******************************************/
-int ParseSIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
+int ParseSIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_SIT_T *pstTS_SIT, int *piSitInfoCount)
 {
-	DUBUGPRINTF("\n\n=================================ParseSIT_Table SITart================================= \n");
-	int iTemp = 0;
-	TS_SIT_T stTS_SIT = { 0 };
+	DUBUGPRINTF("\n\n=================================ParseSIT_Table start================================= \n");
+	int iTemp = -1;
 	unsigned int uiVersion = INITIAL_VERSION;
 	unsigned char ucSectionBuffer[SECTION_MAX_LENGTH_4] = { 0 };
 	unsigned int uiRecordGetSection[SECTION_COUNT_256] = { 0 };
@@ -122,10 +122,10 @@ int ParseSIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 		DUBUGPRINTF("Parse SIT error\n");
 		return -1;
 	}
-
 	while (!feof(pfTsFile))
 	{
-		iTemp = GetOneSection(pfTsFile, iTsLength, ucSectionBuffer, SIT_PID, SIT_TABLE_ID, &uiVersion);
+		// todo SIT表执行这一句就报错
+//		iTemp = GetOneSection(pfTsFile, iTsLength, ucSectionBuffer, SIT_PID, SIT_TABLE_ID, &uiVersion);
 		switch (iTemp)
 		{
 			case 0:
@@ -136,8 +136,11 @@ int ParseSIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 			case 1:
 				if (0 == IsSectionGetBefore(ucSectionBuffer, uiRecordGetSection))
 				{
-					ParseSIT_Section(&stTS_SIT, ucSectionBuffer);
-					PrintSIT(&stTS_SIT);
+					*piSitInfoCount = ParseSIT_Section(pstTS_SIT, ucSectionBuffer);
+					if (1 == PRINTFSIT_INFO)
+					{
+						PrintSIT(pstTS_SIT);
+					}
 				}
 				if (1 == IsAllSectionOver(ucSectionBuffer, uiRecordGetSection))
 				{
@@ -149,7 +152,7 @@ int ParseSIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 				break;
 			case -1:
 				DUBUGPRINTF("\n\n=================================ParseSIT_Table End================================= \n");
-				return 1;
+				return -1;
 				break;
 			default:
 				LOG("ParseSIT_Table switch (iTemp) default\n");

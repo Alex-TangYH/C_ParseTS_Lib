@@ -37,7 +37,7 @@ void ParseAndPrintDescriptorByTag(int iTag, int iDescriptorPosition, unsigned ch
 	LOCAL_TIME_OFFSET_DESCRIPTOR_T stLocalTimeOffsetDescriptor = { 0 };
 	TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR_T stTerrestrialDeliverySystemDescriptor = { 0 };
 	FREQUENCY_LIST_DESCRIPTOR_T stFrequencyListDescriptor = { 0 };
-	
+
 	switch (iTag)
 	{
 		case VIDEO_STREAM_DESCRIPTOR_TAG:
@@ -143,6 +143,9 @@ void ParseAndPrintDescriptorByTag(int iTag, int iDescriptorPosition, unsigned ch
  ******************************************/
 int GetDescriptorCountInBuffer(unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength)
 {
+	if(iDescriptorBufferLength <= 0){
+		return 0;
+	}
 	int descriptorCount = 0;
 	int iTag = 0;
 	int iDescriptorPosition = 0;
@@ -231,6 +234,5 @@ int ParseAndPrintDescriptor(unsigned char *pucDescriptorBuffer, int iDescriptorB
 		}
 	}
 	while (iDescriptorPosition < iDescriptorBufferLength);
-
 	return 1;
 }

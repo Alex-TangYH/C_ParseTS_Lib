@@ -12,7 +12,7 @@
 #define LOCAL_TIME_OFFSET_INFO_MAX 14
 #define SUBTITLING_INFO_MAX 32
 #define SHORT_EVENT_INFO_MAX 256
-#define EXTENDED_EVENT_DESCRIPTOR_INFO_MAX 128
+#define EXTENDED_EVENT_DESCRIPTOR_INFO_MAX 30
 #define EXTENDED_EVENT_DESCRIPTOR_CHAR_MAX 256
 #define FREQUENCY_LIST_DESCRIPTOR_INFO_MAX 64
 
@@ -308,6 +308,7 @@ typedef struct EXTENDED_EVENT_DESCRIPTOR_T
 	EXTENDED_EVENT_INFO_T astExtended_event_info[EXTENDED_EVENT_DESCRIPTOR_INFO_MAX];
 	unsigned int uiText_length :8;
 	unsigned char aucText_char[EXTENDED_EVENT_DESCRIPTOR_CHAR_MAX];
+	int iInfoCount;
 } EXTENDED_EVENT_DESCRIPTOR_T;
 
 typedef struct FREQUENCY_LIST_INFO_T
@@ -323,6 +324,47 @@ typedef struct FREQUENCY_LIST_DESCRIPTOR_T
 	unsigned int uiCoding_type :2;
 	FREQUENCY_LIST_INFO_T astCentre_frequency[FREQUENCY_LIST_DESCRIPTOR_INFO_MAX];
 } FREQUENCY_LIST_DESCRIPTOR_T;
+
+typedef struct CONTENT_INFO_T
+{
+	unsigned int uiContent_nibble_level_1 :4;
+	unsigned int uiContent_nibble_level_2 :4;
+	unsigned int uiUser_byte :8;
+} CONTENT_INFO_T;
+
+typedef struct CONTENT_DESCRIPTOR_T
+{
+	unsigned int uiDescriptor_tag :8;
+	unsigned int uiDescriptor_length :8;
+	CONTENT_INFO_T astContent_info[];
+} CONTENT_DESCRIPTOR_T;
+
+typedef struct PARENTAL_RATING_INFO_T
+{
+	unsigned int uiCountry_code :8;
+	unsigned int uiRating :8;
+} PARENTAL_RATING_INFO_T;
+
+typedef struct PARENTAL_RATING_DESCRIPTOR_T
+{
+	unsigned int uiDescriptor_tag :8;
+	unsigned int uiDescriptor_length :8;
+	PARENTAL_RATING_INFO_T astParental_rating_info[];
+} PARENTAL_RATING_DESCRIPTOR_T;
+
+typedef struct COMPONENT_DESCRIPTOR_T
+{
+	unsigned int uiDescriptor_tag :8;
+	unsigned int uiDescriptor_length :8;
+	unsigned int uiReserved_future_use :4;
+	unsigned int uiStream_content :4;
+	unsigned int uiComponent_type :8;
+	unsigned int uiComponent_tag :8;
+	ISO_639_LANGUAGE_CODE_T stISO_639_language_code;
+	unsigned char aucText_char[];
+} COMPONENT_DESCRIPTOR_T;
+
+
 
 int GetFrequencyListDescriptor(FREQUENCY_LIST_DESCRIPTOR_T *pstFrequencyListDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition);
 int GetTerrestrialDeliverySystemDescriptor(TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR_T *pstTerrestrialDeliverySystemDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition);
@@ -346,4 +388,7 @@ int GetTeletextDescriptor(TELETEXT_DESCRIPTOR_T *pstTeletextDescriptor, unsigned
 int GetLocalTimeOffsetDescriptor(LOCAL_TIME_OFFSET_DESCRIPTOR_T *pstLocalTimeOffsetDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition);
 int GetSubtitlingDescriptor(SUBTITLING_DESCRIPTOR_T *pstSubtitlingDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition);
 int GetAudioStreamDescriptor(AUDIO_STREAM_DESCRIPTOR_T *pstAudioStreamDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition);
+int GetContentDescriptor(CONTENT_DESCRIPTOR_T *pstContentDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition);
+int GetParentalRatingDescriptor(PARENTAL_RATING_DESCRIPTOR_T *pstParentalRatingDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition);
+int GetComponentDescriptor(COMPONENT_DESCRIPTOR_T *pstComponentDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition);
 #endif

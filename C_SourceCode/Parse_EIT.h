@@ -1,7 +1,7 @@
-#ifndef _PARSE_BAT_H_
-#define _PARSE_BAT_H_
+#ifndef _PARSE_EIT_H_
+#define _PARSE_EIT_H_
 
-#define EIT_INFO_MAX 50
+#define EIT_INFO_MAX 20
 #define EIT_DESCRIPTOR_MAX 100
 
 typedef struct EIT_INFO_T
@@ -43,9 +43,10 @@ typedef struct TS_EIT_T
 	unsigned int uiLast_table_id :8;
 	EIT_INFO_T astEIT_info[EIT_INFO_MAX];
 	unsigned long uiCRC_32 :32;
+	int eitInfoCount;
 } TS_EIT_T;
 
 int ParseEIT_Section(TS_EIT_T *pstTS_EIT, unsigned char *pucSectionBuffer);
-int ParseEIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, int iEIT_table_id);
+int ParseEIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, int iEIT_table_id, TS_EIT_T *astEitArray, int *piEitTableCount);
 #endif
 

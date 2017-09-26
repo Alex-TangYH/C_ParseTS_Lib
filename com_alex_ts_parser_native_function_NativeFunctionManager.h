@@ -100,8 +100,8 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
  * Method:    parseEIT
  * Signature: (Ljava/lang/String;)Lcom/alex/ts_parser/bean/si/EIT_Table;
  */
-JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseEIT
-  (JNIEnv *, jclass, jstring);
+JNIEXPORT jobjectArray JNICALL Java_com_alex_ts_1parser_native_1function_NativeFunctionManager_parseEIT
+  (JNIEnv *, jclass, jstring, jint);
 
 /*
  * Class:     com_alex_ts_parser_native_function_NativeFunctionManager

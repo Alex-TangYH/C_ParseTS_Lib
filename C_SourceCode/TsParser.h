@@ -20,7 +20,11 @@
 #define PRINTFSDT_INFO 0
 #define PRINTFST_INFO 1
 #define PRINTFDIT_INFO 1
-#define LOGPRINTF
+#define PRINTFSIT_INFO 1
+#define PRINTFRST_INFO 1
+#define PRINTFEID_INFO 0
+#define PRINTFBAT_INFO 1
+//#define LOGPRINTF
 
 #ifdef DEBUG
     #define DUBUGPRINTF printf

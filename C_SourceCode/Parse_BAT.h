@@ -35,5 +35,5 @@ typedef struct TS_BAT_T
 	unsigned long uiCRC_32 :32;
 } TS_BAT_T;
 
-int ParseBAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength);
+int ParseBAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_BAT_T *pstBat, int *piBatInfoCount);
 #endif

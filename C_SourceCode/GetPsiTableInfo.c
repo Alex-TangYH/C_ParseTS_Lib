@@ -182,3 +182,46 @@ int GetRstTable(FILE *pfTsFile, TS_RST_T *pstRST)
 	}
 	return ParseRST_Table(pfTsFile, iTsPosition, iTsLength, pstRST);
 }
+
+//获取SIT
+int GetSitTable(FILE *pfTsFile, TS_SIT_T *pstBat, int *piBatInfoCount)
+{
+	int iTsPosition = 0;
+	int iTsLength = 0;
+	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
+	if (-1 == iTsLength)
+	{
+		DUBUGPRINTF("The file is not the transport stream file\n");
+		return -1;
+	}
+	return ParseSIT_Table(pfTsFile, iTsPosition, iTsLength, pstBat, piBatInfoCount);
+}
+
+//获取所有EIT表数组
+int GetAllEitTable(FILE *pfTsFile, TS_EIT_T *astEitArray, int *piEitTableCount, int iEIT_table_id)
+{
+	int iTsPosition = 0;
+	int iTsLength = 0;
+	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
+	if (-1 == iTsLength)
+	{
+		DUBUGPRINTF("The file is not the transport stream file\n");
+		return -1;
+	}
+
+	return ParseEIT_Table(pfTsFile, iTsPosition, iTsLength, iEIT_table_id, astEitArray, piEitTableCount);
+}
+
+//获取BAT
+int GetBatTable(FILE *pfTsFile, TS_BAT_T *pstBat, int *piBatInfoCount)
+{
+	int iTsPosition = 0;
+	int iTsLength = 0;
+	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
+	if (-1 == iTsLength)
+	{
+		DUBUGPRINTF("The file is not the transport stream file\n");
+		return -1;
+	}
+	return ParseBAT_Table(pfTsFile, iTsPosition, iTsLength, pstBat, piBatInfoCount);
+}

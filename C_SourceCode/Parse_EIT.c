@@ -13,7 +13,6 @@
 #define SECTION_COUNT_256 256
 #define SECTION_MAX_LENGTH_4092 1024 * 4
 #define OUTPUT_PREFIX_SIZE 256
-#define PRINTFEID_INFO 1
 
 /******************************************
  *
@@ -155,8 +154,6 @@ int IsEITSectionGetBefore(unsigned char *pucSectionBuffer, EIT_IDENTIFICATION_IN
 	past_EIT_identification[*piEITCount].uiSection_number = pstTS_EIT->uiSection_number;
 	past_EIT_identification[*piEITCount].uiVersion_number = pstTS_EIT->uiVersion_number;
 	past_EIT_identification[*piEITCount].uiService_id = pstTS_EIT->uiService_id;
-	(*piEITCount)++;
-	
 	return 0;
 }
 
@@ -165,7 +162,7 @@ int IsEITSectionGetBefore(unsigned char *pucSectionBuffer, EIT_IDENTIFICATION_IN
  * 从缓存中解析EIT表
  *
  ******************************************/
-int ParseEIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, int iEIT_table_id)
+int ParseEIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, int iEIT_table_id, TS_EIT_T *astEitArray, int *piEitTableCount)
 {
 	DUBUGPRINTF("\n\n=================================ParseEIT_Table Start================================= \n");
 	int iTemp = 0;
@@ -173,16 +170,13 @@ int ParseEIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, int iEIT_tabl
 	unsigned int uiVersion = INITIAL_VERSION;
 	unsigned char ucSectionBuffer[SECTION_MAX_LENGTH_4092] = { 0 };
 	unsigned int uiRecordGetSection[SECTION_COUNT_256] = { 0 };
-	TS_EIT_T stTS_EIT = { 0 };
 	EIT_IDENTIFICATION_INFO_T ast_EIT_identification[SECTION_COUNT_256] = { 0 };
-	int iEITCount = 0;
 	
 	if (-1 == fseek(pfTsFile, iTsPosition, SEEK_SET))
 	{
 		DUBUGPRINTF("Parse EIT error\n");
 		return -1;
 	}
-	
 	while (!feof(pfTsFile))
 	{
 		iTemp = GetOneSection(pfTsFile, iTsLength, ucSectionBuffer, EIT_PID, iEIT_table_id, &uiVersion);
@@ -194,22 +188,30 @@ int ParseEIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, int iEIT_tabl
 				fseek(pfTsFile, 0 - iTsLength, SEEK_CUR);
 				break;
 			case 1:
-				if (0 == IsEITSectionGetBefore(ucSectionBuffer, ast_EIT_identification, &iEITCount, &stTS_EIT))
+				if (0 == IsEITSectionGetBefore(ucSectionBuffer, ast_EIT_identification, piEitTableCount, &astEitArray[*piEitTableCount]))
 				{
-					iEIT_InfoCount = ParseEIT_Section(&stTS_EIT, ucSectionBuffer);
+					iEIT_InfoCount = ParseEIT_Section(&astEitArray[*piEitTableCount], ucSectionBuffer);
+					astEitArray[*piEitTableCount].eitInfoCount = iEIT_InfoCount;
 					if (1 == PRINTFEID_INFO)
 					{
-						PrintEIT(&stTS_EIT, iEIT_InfoCount);
+						PrintEIT(&astEitArray[*piEitTableCount], iEIT_InfoCount);
 					}
+					(*piEitTableCount)++;
 				}
-				//TODO 增加提前停止解析条件
+				if (feof(pfTsFile))
+				{
+					return 1;
+				}
 				break;
 			case 2:
 				break;
 			case -1:
-				DUBUGPRINTF("iEITCount : %d\n", iEITCount);
+				DUBUGPRINTF("iEITCount : %d\n", *piEitTableCount);
 				DUBUGPRINTF("\n=================================ParseEIT_Table END=================================== \n\n");
-				return 1;
+				if (feof(pfTsFile))
+				{
+					return 0;
+				}
 				break;
 			default:
 				LOG("ParseEIT_Table switch (iTemp) default\n");

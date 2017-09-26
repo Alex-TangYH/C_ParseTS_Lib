@@ -16,9 +16,9 @@
  *****************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "ParseTS_Length.h"
-
 #include "TsParser.h"
 #include "Parse_EIT.h"
 #include "Parse_EMM.h"
@@ -78,10 +78,15 @@ int ParseAllProgramPMT(FILE *pfTsFile, int iTsPosition, int iTsLength, PAT_INFO_
 
 int ParseAllEIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength)
 {
-	ParseEIT_Table(pfTsFile, iTsPosition, iTsLength, EIT_PF_ACTUAL_TABLE_ID);
+	//TODO 去掉40这个参数，动态分配
+	TS_EIT_T *astEitArray = (TS_EIT_T *) malloc(40 * sizeof(TS_EIT_T));
+	int iEitCount = 0;
+	ParseEIT_Table(pfTsFile, iTsPosition, iTsLength, EIT_PF_ACTUAL_TABLE_ID, astEitArray, &iEitCount);
 //	ParseEIT_Table(pfTsFile, iTsPosition, iTsLength, EIT_EIT_SCHEDULE_TABLE_ID_ONE);
 //	ParseEIT_Table(pfTsFile, iTsPosition, iTsLength, EIT_EIT_SCHEDULE_TABLE_ID_TWO);
 //	 TODO 对返回值进行判断
+	free(astEitArray);
+	astEitArray = NULL;
 	return 0;
 }
 
@@ -111,9 +116,13 @@ int ParseTransportStream(FILE *pfTsFile)
 	TS_SDT_T stTS_SDT = { 0 };
 	TS_ST_T stTS_ST = { 0 };
 	TS_DIT_T stTS_DIT = { 0 };
+	TS_SIT_T stTS_SIT = { 0 };
 	TS_RST_T stTS_RST = { 0 };
+	TS_BAT_T stTS_BAT = { 0 };
 	int nitTransportStreamDescriptorCount = 0;
+	int sitInfoCount = 0;
 	int iSdtInfoCount = 0;
+	int iBatInfoCount = 0;
 
 	iTsLength = ParseTsLength(pfTsFile, &iTsPosition);
 	if (-1 == iTsLength)
@@ -180,7 +189,7 @@ int ParseTransportStream(FILE *pfTsFile)
 		return -1;
 	}
 
-	if (-1 == ParseBAT_Table(pfTsFile, iTsPosition, iTsLength))
+	if (-1 == ParseBAT_Table(pfTsFile, iTsPosition, iTsLength, &stTS_BAT, &iBatInfoCount))
 	{
 		return -1;
 	}
@@ -205,7 +214,7 @@ int ParseTransportStream(FILE *pfTsFile)
 		//return -1;
 	}
 
-	if (-1 == ParseSIT_Table(pfTsFile, iTsPosition, iTsLength))
+	if (-1 == ParseSIT_Table(pfTsFile, iTsPosition, iTsLength, &stTS_SIT, &sitInfoCount))
 	{
 		//return -1;
 	}
@@ -248,7 +257,7 @@ int parseStream(char *pcFilePath)
  ****************************************************************/
 int main()
 {
-	char cTestFilePath[] = "D:\\test\\test_pat_pmt.ts";
+	char cTestFilePath[] = "D:\\test\\test.ts";
 	parseStream(cTestFilePath);
 	Test();
 	return 1;

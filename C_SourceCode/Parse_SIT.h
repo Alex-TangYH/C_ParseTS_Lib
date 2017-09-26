@@ -1,9 +1,9 @@
 #ifndef _PARSE_SIT_H_
 #define _PARSE_SIT_H_
 
-#define SIT_DESCRIPTOR_INFO_MAX 1024 * 4
-#define SIT_INFO_MAX 1024 * 4
-#define SIT_INFO_DESCRIPTOR_MAX 1024 * 4
+#define SIT_DESCRIPTOR_INFO_MAX 100
+#define SIT_INFO_MAX 2
+#define SIT_INFO_DESCRIPTOR_MAX 100
 
 typedef struct SIT_INFO_T
 {
@@ -34,5 +34,5 @@ typedef struct TS_SIT_T
 	unsigned long uiCRC32 :32;
 } TS_SIT_T;
 
-int ParseSIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength);
+int ParseSIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_SIT_T *pstTS_SIT, int *piSitInfoCount);
 #endif

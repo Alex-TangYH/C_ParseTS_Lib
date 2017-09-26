@@ -61,7 +61,7 @@ int GetServiceListDescriptor(SERVICE_LIST_DESCRIPTOR_T *pstServiceListDescriptor
  **********************************************************/
 int GetCableDeliverySystemDescriptor(CABLE_DELIVERY_SYSTEM_DESCRIPTOR_T *pstCableDeliverySystemDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition)
 {
-	memset(pstCableDeliverySystemDescriptor, 0, sizeof(SERVICE_LIST_DESCRIPTOR_T));
+	memset(pstCableDeliverySystemDescriptor, 0, sizeof(CABLE_DELIVERY_SYSTEM_DESCRIPTOR_T));
 	pstCableDeliverySystemDescriptor->uiDescriptor_tag = pucDescriptorBuffer[iDescriptorPosition];
 	pstCableDeliverySystemDescriptor->uiDescriptor_length = pucDescriptorBuffer[1 + iDescriptorPosition];
 	if (pstCableDeliverySystemDescriptor->uiDescriptor_length > 0)
@@ -391,49 +391,55 @@ int GetExtendedEventDescriptor(EXTENDED_EVENT_DESCRIPTOR_T *pstExtendedEventDesc
 	memset(pstExtendedEventDescriptor, 0, sizeof(EXTENDED_EVENT_DESCRIPTOR_T));
 	pstExtendedEventDescriptor->uiDescriptor_tag = pucDescriptorBuffer[iDescriptorPosition];
 	pstExtendedEventDescriptor->uiDescriptor_length = pucDescriptorBuffer[1 + iDescriptorPosition];
-	pstExtendedEventDescriptor->uiDescriptor_number = pucDescriptorBuffer[2 + iDescriptorPosition] >> 4;
-	pstExtendedEventDescriptor->uiLast_descriptor_number = pucDescriptorBuffer[2 + iDescriptorPosition] & 0x0f;
-	pstExtendedEventDescriptor->stISO_639_language_code.aucPrivate_data_byte[0] = pucDescriptorBuffer[3 + iDescriptorPosition];
-	pstExtendedEventDescriptor->stISO_639_language_code.aucPrivate_data_byte[1] = pucDescriptorBuffer[4 + iDescriptorPosition];
-	pstExtendedEventDescriptor->stISO_639_language_code.aucPrivate_data_byte[2] = pucDescriptorBuffer[5 + iDescriptorPosition];
-	pstExtendedEventDescriptor->uiLength_of_items = pucDescriptorBuffer[6 + iDescriptorPosition];
-	if (pstExtendedEventDescriptor->uiLength_of_items > 0)
+	if (pstExtendedEventDescriptor->uiDescriptor_length > 4)
 	{
-		for (iDescriptorInfoPostion = 0; iDescriptorInfoPostion < pstExtendedEventDescriptor->uiLength_of_items; iDescriptorInfoPostion += 2)
+		pstExtendedEventDescriptor->uiDescriptor_number = pucDescriptorBuffer[2 + iDescriptorPosition] >> 4;
+		pstExtendedEventDescriptor->uiLast_descriptor_number = pucDescriptorBuffer[2 + iDescriptorPosition] & 0x0f;
+		pstExtendedEventDescriptor->stISO_639_language_code.aucPrivate_data_byte[0] = pucDescriptorBuffer[3 + iDescriptorPosition];
+		pstExtendedEventDescriptor->stISO_639_language_code.aucPrivate_data_byte[1] = pucDescriptorBuffer[4 + iDescriptorPosition];
+		pstExtendedEventDescriptor->stISO_639_language_code.aucPrivate_data_byte[2] = pucDescriptorBuffer[5 + iDescriptorPosition];
+		pstExtendedEventDescriptor->uiLength_of_items = pucDescriptorBuffer[6 + iDescriptorPosition];
+		if (pstExtendedEventDescriptor->uiLength_of_items > 0)
 		{
-			pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_descriptor_length = pucDescriptorBuffer[7 + iDescriptorPosition];
-			if (pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_descriptor_length > 0)
+			for (iDescriptorInfoPostion = 0; iDescriptorInfoPostion < pstExtendedEventDescriptor->uiLength_of_items; iDescriptorInfoPostion += 2)
 			{
-				memcpy(pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].aucItem_descriptor_char, pucDescriptorBuffer + 8, pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_descriptor_length);
-			}
-			else
-			{
-			}
-			iDescriptorInfoPostion += pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_descriptor_length;
+				pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_descriptor_length = pucDescriptorBuffer[7 + iDescriptorPosition];
+				if (pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_descriptor_length > 0)
+				{
+					memcpy(pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].aucItem_descriptor_char, pucDescriptorBuffer + 8, pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_descriptor_length);
+					iDescriptorInfoPostion += pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_descriptor_length;
+				}
+				else
+				{
+				}
 
-			pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_length = pucDescriptorBuffer[8 + iDescriptorPosition];
-			if (pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_length > 0)
-			{
-				memcpy(pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].aucItem_descriptor_char, pucDescriptorBuffer + 9 + iDescriptorInfoPostion, pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_length);
+				pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_length = pucDescriptorBuffer[8 + iDescriptorPosition];
+				if (pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_length > 0)
+				{
+					memcpy(pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].aucItem_descriptor_char, pucDescriptorBuffer + 9 + iDescriptorInfoPostion, pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_length);
+					iDescriptorInfoPostion += pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_length;
+				}
+				else
+				{
+				}
+				// TODO 取消注释会报错
+//				iLoopCount++;
 			}
-			else
-			{
-			}
-			iDescriptorInfoPostion += pstExtendedEventDescriptor->astExtended_event_info[iLoopCount].uiItem_length;
-			iLoopCount++;
+			pstExtendedEventDescriptor->iInfoCount = iLoopCount;
+		}
+		else
+		{
+		}
+		pstExtendedEventDescriptor->uiText_length = pucDescriptorBuffer[7 + iDescriptorPosition + pstExtendedEventDescriptor->uiLength_of_items];
+		if (pstExtendedEventDescriptor->uiText_length > 0)
+		{
+			memcpy(pstExtendedEventDescriptor->aucText_char, pucDescriptorBuffer + 8 + pstExtendedEventDescriptor->uiLength_of_items, pstExtendedEventDescriptor->uiText_length);
+		}
+		else
+		{
 		}
 	}
-	else
-	{
-	}
-	pstExtendedEventDescriptor->uiText_length = pucDescriptorBuffer[7 + iDescriptorPosition + pstExtendedEventDescriptor->uiLength_of_items];
-	if (pstExtendedEventDescriptor->uiText_length > 0)
-	{
-		memcpy(pstExtendedEventDescriptor->aucText_char, pucDescriptorBuffer + 8 + pstExtendedEventDescriptor->uiLength_of_items, pstExtendedEventDescriptor->uiText_length);
-	}
-	else
-	{
-	}
+
 	return iDescriptorPosition;
 }
 
@@ -498,7 +504,7 @@ int GetVideoStreamDescriptor(VIDEO_STREAM_DESCRIPTOR_T *pstVideoStreamDescriptor
  ******************************************/
 int GetAudioStreamDescriptor(AUDIO_STREAM_DESCRIPTOR_T *pstAudioStreamDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition)
 {
-	memset(pstAudioStreamDescriptor, 0, sizeof(VIDEO_STREAM_DESCRIPTOR_T));
+	memset(pstAudioStreamDescriptor, 0, sizeof(AUDIO_STREAM_DESCRIPTOR_T));
 	pstAudioStreamDescriptor->uiDescriptor_tag = pucDescriptorBuffer[iDescriptorPosition + 0];
 	pstAudioStreamDescriptor->uiDescriptor_length = pucDescriptorBuffer[iDescriptorPosition + 1];
 	pstAudioStreamDescriptor->uiFree_format_flag = pucDescriptorBuffer[iDescriptorPosition + 2] >> 7;
@@ -547,10 +553,13 @@ int GetCA_Descriptor(CA_DESCRIPTOR_T *pstCA_Descriptor, unsigned char *pucDescri
 	memset(pstCA_Descriptor, 0, sizeof(CA_DESCRIPTOR_T));
 	pstCA_Descriptor->uiDescriptor_tag = pucDescriptorBuffer[iDescriptorPosition + 0];
 	pstCA_Descriptor->uiDescriptor_length = pucDescriptorBuffer[iDescriptorPosition + 1];
-	pstCA_Descriptor->uiCA_system_ID = (pucDescriptorBuffer[iDescriptorPosition + 2] << 8) | pucDescriptorBuffer[iDescriptorPosition + 3];
-	pstCA_Descriptor->uiReserved = pucDescriptorBuffer[iDescriptorPosition + 4] >> 5;
-	pstCA_Descriptor->uiCA_PID = ((pucDescriptorBuffer[iDescriptorPosition + 4] & 0x1f) << 8) | pucDescriptorBuffer[iDescriptorPosition + 5];
-	memcpy(pstCA_Descriptor->aucPrivate_data_byte, pucDescriptorBuffer + iDescriptorPosition + 6, pstCA_Descriptor->uiDescriptor_length - 4);
+	if (pstCA_Descriptor->uiDescriptor_length > 0)
+	{
+		pstCA_Descriptor->uiCA_system_ID = (pucDescriptorBuffer[iDescriptorPosition + 2] << 8) | pucDescriptorBuffer[iDescriptorPosition + 3];
+		pstCA_Descriptor->uiReserved = pucDescriptorBuffer[iDescriptorPosition + 4] >> 5;
+		pstCA_Descriptor->uiCA_PID = ((pucDescriptorBuffer[iDescriptorPosition + 4] & 0x1f) << 8) | pucDescriptorBuffer[iDescriptorPosition + 5];
+		memcpy(pstCA_Descriptor->aucPrivate_data_byte, pucDescriptorBuffer + iDescriptorPosition + 6, pstCA_Descriptor->uiDescriptor_length - 4);
+	}
 	return iDescriptorPosition;
 }
 
@@ -595,3 +604,67 @@ int GetISO_639_Language_Descriptor(ISO_639_LANGUAGE_DESCRIPTOR_T *pstISO_639_Lan
 	return iDescriptorPosition;
 }
 
+/*********************************************************
+ *
+ * 解析Content Descriptor描述子信息
+ *
+ **********************************s***********************/
+int GetContentDescriptor(CONTENT_DESCRIPTOR_T *pstContentDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition)
+{
+	int iLoopCount = 0;
+	int iLoopInfoLength = 2;
+	memset(pstContentDescriptor, 0, sizeof(CONTENT_DESCRIPTOR_T));
+	pstContentDescriptor->uiDescriptor_tag = pucDescriptorBuffer[iDescriptorPosition];
+	pstContentDescriptor->uiDescriptor_length = pucDescriptorBuffer[1 + iDescriptorPosition];
+	for (iLoopCount = 0; iLoopCount * iLoopInfoLength < pstContentDescriptor->uiDescriptor_length; iLoopCount++)
+	{
+		pstContentDescriptor->astContent_info[iLoopCount].uiContent_nibble_level_1 = pucDescriptorBuffer[2 + iDescriptorPosition + iLoopCount * iLoopInfoLength] >> 4;
+		pstContentDescriptor->astContent_info[iLoopCount].uiContent_nibble_level_2 = pucDescriptorBuffer[2 + iDescriptorPosition + iLoopCount * iLoopInfoLength] & 0x0f;
+		pstContentDescriptor->astContent_info[iLoopCount].uiUser_byte = pucDescriptorBuffer[3 + iDescriptorPosition + iLoopCount * iLoopInfoLength];
+	}
+	return iDescriptorPosition;
+}
+
+/*********************************************************
+ *
+ * 解析Parental Rating Descriptor描述子信息
+ *
+ **********************************s***********************/
+int GetParentalRatingDescriptor(PARENTAL_RATING_DESCRIPTOR_T *pstParentalRatingDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition)
+{
+	int iLoopCount = 0;
+	int iLoopInfoLength = 2;
+	memset(pstParentalRatingDescriptor, 0, sizeof(PARENTAL_RATING_DESCRIPTOR_T));
+	pstParentalRatingDescriptor->uiDescriptor_tag = pucDescriptorBuffer[iDescriptorPosition];
+	pstParentalRatingDescriptor->uiDescriptor_length = pucDescriptorBuffer[1 + iDescriptorPosition];
+	for (iLoopCount = 0; iLoopCount * iLoopInfoLength < pstParentalRatingDescriptor->uiDescriptor_length; iLoopCount++)
+	{
+		pstParentalRatingDescriptor->astParental_rating_info[iLoopCount].uiCountry_code = pucDescriptorBuffer[2 + iDescriptorPosition + iLoopCount * iLoopInfoLength];
+		pstParentalRatingDescriptor->astParental_rating_info[iLoopCount].uiRating = pucDescriptorBuffer[3 + iDescriptorPosition + iLoopCount * iLoopInfoLength];
+	}
+	return iDescriptorPosition;
+}
+
+/******************************************
+ *
+ * 解析Component Descriptor描述子信息
+ *
+ ******************************************/
+int GetComponentDescriptor(COMPONENT_DESCRIPTOR_T *pstComponentDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition)
+{
+	memset(pstComponentDescriptor, 0, sizeof(COMPONENT_DESCRIPTOR_T));
+	pstComponentDescriptor->uiDescriptor_tag = pucDescriptorBuffer[iDescriptorPosition];
+	pstComponentDescriptor->uiDescriptor_length = pucDescriptorBuffer[1 + iDescriptorPosition];
+	if (pstComponentDescriptor->uiDescriptor_length > 6)
+	{
+		pstComponentDescriptor->uiReserved_future_use = pucDescriptorBuffer[2 + iDescriptorPosition] >> 4;
+		pstComponentDescriptor->uiStream_content = pucDescriptorBuffer[2 + iDescriptorPosition] & 0x0f;
+		pstComponentDescriptor->uiComponent_type = pucDescriptorBuffer[3 + iDescriptorPosition];
+		pstComponentDescriptor->uiComponent_tag = pucDescriptorBuffer[4 + iDescriptorPosition];
+		pstComponentDescriptor->stISO_639_language_code.aucPrivate_data_byte[0] = pucDescriptorBuffer[iDescriptorPosition + 5];
+		pstComponentDescriptor->stISO_639_language_code.aucPrivate_data_byte[1] = pucDescriptorBuffer[iDescriptorPosition + 6];
+		pstComponentDescriptor->stISO_639_language_code.aucPrivate_data_byte[2] = pucDescriptorBuffer[iDescriptorPosition + 7];
+		memcpy(pstComponentDescriptor->aucText_char, pucDescriptorBuffer + iDescriptorPosition + 8, pstComponentDescriptor->uiDescriptor_length - 6);
+	}
+	return iDescriptorPosition;
+}

@@ -17,7 +17,13 @@
 #include "Parse_ST.h"
 #include "Parse_DIT.h"
 #include "Parse_RST.h"
+#include "Parse_SIT.h"
+#include "Parse_EIT.h"
+#include "Parse_BAT.h"
 
+int GetBatTable(FILE *pfTsFile, TS_BAT_T *pstBat, int *piBatInfoCount);
+int GetAllEitTable(FILE *pfTsFile, TS_EIT_T *astEitArray, int *piEitTableCount, int iEIT_table_id);
+int GetSitTable(FILE *pfTsFile, TS_SIT_T *pstSIT, int *piSitInfoCount);
 int GetRstTable(FILE *pfTsFile, TS_RST_T *pstRST);
 int GetDitTable(FILE *pfTsFile, TS_DIT_T *pstDIT);
 int GetStTable(FILE *pfTsFile, TS_ST_T *pstST);
