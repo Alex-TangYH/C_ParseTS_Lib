@@ -341,7 +341,7 @@ typedef struct CONTENT_DESCRIPTOR_T
 
 typedef struct PARENTAL_RATING_INFO_T
 {
-	unsigned int uiCountry_code :8;
+	unsigned char uiCountry_code[3];
 	unsigned int uiRating :8;
 } PARENTAL_RATING_INFO_T;
 
@@ -363,8 +363,6 @@ typedef struct COMPONENT_DESCRIPTOR_T
 	ISO_639_LANGUAGE_CODE_T stISO_639_language_code;
 	unsigned char aucText_char[];
 } COMPONENT_DESCRIPTOR_T;
-
-
 
 int GetFrequencyListDescriptor(FREQUENCY_LIST_DESCRIPTOR_T *pstFrequencyListDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition);
 int GetTerrestrialDeliverySystemDescriptor(TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR_T *pstTerrestrialDeliverySystemDescriptor, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength, int iDescriptorPosition);

@@ -371,7 +371,7 @@ int GetShortEventDescriptor(SHORT_EVENT_DESCRIPTOR_T *pstShortEventDescriptor, u
 	pstShortEventDescriptor->uiText_length = pucDescriptorBuffer[6 + iDescriptorPosition + pstShortEventDescriptor->uiEvent_name_length];
 	if (pstShortEventDescriptor->uiText_length > 0)
 	{
-		memcpy(pstShortEventDescriptor->aucEvent_name_char, pucDescriptorBuffer + 7 + pstShortEventDescriptor->uiEvent_name_length, pstShortEventDescriptor->uiText_length);
+		memcpy(pstShortEventDescriptor->aucText_char, pucDescriptorBuffer + 7 + pstShortEventDescriptor->uiEvent_name_length, pstShortEventDescriptor->uiText_length);
 	}
 	else
 	{
@@ -637,10 +637,12 @@ int GetParentalRatingDescriptor(PARENTAL_RATING_DESCRIPTOR_T *pstParentalRatingD
 	memset(pstParentalRatingDescriptor, 0, sizeof(PARENTAL_RATING_DESCRIPTOR_T));
 	pstParentalRatingDescriptor->uiDescriptor_tag = pucDescriptorBuffer[iDescriptorPosition];
 	pstParentalRatingDescriptor->uiDescriptor_length = pucDescriptorBuffer[1 + iDescriptorPosition];
-	for (iLoopCount = 0; iLoopCount * iLoopInfoLength < pstParentalRatingDescriptor->uiDescriptor_length; iLoopCount++)
+	for (iLoopCount = 0; iLoopCount * iLoopInfoLength < pstParentalRatingDescriptor->uiDescriptor_length; iLoopCount += 4)
 	{
-		pstParentalRatingDescriptor->astParental_rating_info[iLoopCount].uiCountry_code = pucDescriptorBuffer[2 + iDescriptorPosition + iLoopCount * iLoopInfoLength];
-		pstParentalRatingDescriptor->astParental_rating_info[iLoopCount].uiRating = pucDescriptorBuffer[3 + iDescriptorPosition + iLoopCount * iLoopInfoLength];
+		pstParentalRatingDescriptor->astParental_rating_info[iLoopCount].uiCountry_code[0] = pucDescriptorBuffer[2 + iDescriptorPosition + iLoopCount * iLoopInfoLength];
+		pstParentalRatingDescriptor->astParental_rating_info[iLoopCount].uiCountry_code[1] = pucDescriptorBuffer[3 + iDescriptorPosition + iLoopCount * iLoopInfoLength];
+		pstParentalRatingDescriptor->astParental_rating_info[iLoopCount].uiCountry_code[2] = pucDescriptorBuffer[4 + iDescriptorPosition + iLoopCount * iLoopInfoLength];
+		pstParentalRatingDescriptor->astParental_rating_info[iLoopCount].uiRating = pucDescriptorBuffer[5 + iDescriptorPosition + iLoopCount * iLoopInfoLength];
 	}
 	return iDescriptorPosition;
 }

@@ -1127,13 +1127,14 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 				case PARENTAL_RATING_DESCRIPTOR_TAG:
 					GetParentalRatingDescriptor(&stParentalRatingDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
 					jclass parentalRatingInfoClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/ParentalRatingInfo");
-					jmethodID parentalRatingInfoConstrocMID = (*env)->GetMethodID(env, parentalRatingInfoClass, "<init>", "(II)V");
+					jmethodID parentalRatingInfoConstrocMID = (*env)->GetMethodID(env, parentalRatingInfoClass, "<init>", "([BI)V");
 					iLoopCount = stParentalRatingDescriptor.uiDescriptor_length / 2;
 					tempObjectArray = (*env)->NewObjectArray(env, iLoopCount, parentalRatingInfoClass, NULL);
 					for (iLoopIndex = 0; iLoopIndex < iLoopCount; iLoopIndex++)
 					{
 						PARENTAL_RATING_INFO_T stParentalRatingInfo = stParentalRatingDescriptor.astParental_rating_info[iLoopIndex];
-						tempObject = (*env)->NewObject(env, parentalRatingInfoClass, parentalRatingInfoConstrocMID, stParentalRatingInfo.uiCountry_code, stParentalRatingInfo.uiRating);
+						byteArrayData = GetJByteArrayByUChar(env, stParentalRatingInfo.uiCountry_code, 3);
+						tempObject = (*env)->NewObject(env, parentalRatingInfoClass, parentalRatingInfoConstrocMID, byteArrayData, stParentalRatingInfo.uiRating);
 						(*env)->SetObjectArrayElement(env, tempObjectArray, iLoopIndex, tempObject);
 						(*env)->DeleteLocalRef(env, tempObject);
 					}
