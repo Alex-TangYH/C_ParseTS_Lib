@@ -568,8 +568,6 @@ JNIEXPORT jobjectArray JNICALL Java_com_alex_ts_1parser_native_1function_NativeF
 				{
 					for (iLoopIndex = 0; iLoopIndex < stEit.eitInfoCount; iLoopIndex++)
 					{
-						//TODO test.ts的这一行会报错
-//						printf("stEit.astEIT_info[iLoopIndex].uiDescriptors_loop_length: %d\n",stEit.astEIT_info[iLoopIndex].uiDescriptors_loop_length);
 						int iDescriptorCount = 0;
 						iDescriptorCount = GetDescriptorCountInBuffer(stEit.astEIT_info[iLoopIndex].aucDescriptor, stEit.astEIT_info[iLoopIndex].uiDescriptors_loop_length);
 						jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
@@ -723,7 +721,8 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
  ******************************************/
 int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, unsigned char *pucDescriptorBuffer, int iDescriptorBufferLength)
 {
-	if(iDescriptorBufferLength <= 0){
+	if (iDescriptorBufferLength <= 0)
+	{
 		return 0;
 	}
 

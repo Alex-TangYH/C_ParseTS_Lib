@@ -19,10 +19,9 @@
  * 解析EIT段头部数据
  *
  ******************************************/
-void ParseEIT_SectionHead(TS_EIT_T *pstTS_EIT, unsigned char *pucSectionBuffer)
+int ParseEIT_SectionHead(TS_EIT_T *pstTS_EIT, unsigned char *pucSectionBuffer)
 {
 	int iEIT_SectionLength = 0;
-	
 	pstTS_EIT->uiTable_id = pucSectionBuffer[0];
 	pstTS_EIT->uiSection_syntax_indicator = pucSectionBuffer[1] >> 7;
 	pstTS_EIT->uiReserved_future_use_first = (pucSectionBuffer[1] >> 6) & 0x01;
@@ -40,6 +39,7 @@ void ParseEIT_SectionHead(TS_EIT_T *pstTS_EIT, unsigned char *pucSectionBuffer)
 	pstTS_EIT->uiLast_table_id = pucSectionBuffer[13];
 	iEIT_SectionLength = 3 + pstTS_EIT->uiSection_length;
 	pstTS_EIT->uiCRC_32 = (pucSectionBuffer[iEIT_SectionLength - 4] << 24) | (pucSectionBuffer[iEIT_SectionLength - 3] << 16) | (pucSectionBuffer[iEIT_SectionLength - 2] << 8) | (pucSectionBuffer[iEIT_SectionLength - 1]);
+	return 1;
 }
 
 /******************************************
@@ -54,10 +54,12 @@ int ParseEIT_Section(TS_EIT_T *pstTS_EIT, unsigned char *pucSectionBuffer)
 	int iLoopPosition = 0;
 	int iLoopCount = 0;
 	
+	memset(pstTS_EIT, 0, sizeof(TS_EIT_T));
 	ParseEIT_SectionHead(pstTS_EIT, pucSectionBuffer);
 	iEIT_SectionLength = 3 + pstTS_EIT->uiSection_length;
 
-	for (iLoopPosition = 14; iLoopPosition < iEIT_SectionLength - 4; iLoopPosition += 12)
+	int loopEntryLength = 12;
+	for (iLoopPosition = 14; iLoopPosition < iEIT_SectionLength - 4 - loopEntryLength; iLoopPosition += loopEntryLength)
 	{
 		pstTS_EIT->astEIT_info[iLoopCount].uiEvent_id = (pucSectionBuffer[iLoopPosition + 0] << 8) | pucSectionBuffer[iLoopPosition + 1];
 		for (iUTC_timePosition = 0; iUTC_timePosition < 5; iUTC_timePosition++)
@@ -139,6 +141,7 @@ int IsEITSectionGetBefore(unsigned char *pucSectionBuffer, EIT_IDENTIFICATION_IN
 {
 	int iLoopTime = 0;
 	memset(pstTS_EIT, 0, sizeof(TS_EIT_T));
+
 	ParseEIT_SectionHead(pstTS_EIT, pucSectionBuffer);
 	for (iLoopTime = 0; iLoopTime < *piEITCount; iLoopTime++)
 	{
@@ -177,6 +180,7 @@ int ParseEIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, int iEIT_tabl
 		DUBUGPRINTF("Parse EIT error\n");
 		return -1;
 	}
+
 	while (!feof(pfTsFile))
 	{
 		iTemp = GetOneSection(pfTsFile, iTsLength, ucSectionBuffer, EIT_PID, iEIT_table_id, &uiVersion);
@@ -191,12 +195,19 @@ int ParseEIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, int iEIT_tabl
 				if (0 == IsEITSectionGetBefore(ucSectionBuffer, ast_EIT_identification, piEitTableCount, &astEitArray[*piEitTableCount]))
 				{
 					iEIT_InfoCount = ParseEIT_Section(&astEitArray[*piEitTableCount], ucSectionBuffer);
-					astEitArray[*piEitTableCount].eitInfoCount = iEIT_InfoCount;
-					if (1 == PRINTFEID_INFO)
+					if (astEitArray[*piEitTableCount].uiSection_syntax_indicator != 0x1)
 					{
-						PrintEIT(&astEitArray[*piEitTableCount], iEIT_InfoCount);
+						memset(&astEitArray[*piEitTableCount], 0, sizeof(TS_EIT_T));
 					}
-					(*piEitTableCount)++;
+					else
+					{
+						astEitArray[*piEitTableCount].eitInfoCount = iEIT_InfoCount;
+						if (1 == PRINTFEID_INFO)
+						{
+							PrintEIT(&astEitArray[*piEitTableCount], iEIT_InfoCount);
+						}
+						(*piEitTableCount)++;
+					}
 				}
 				if (feof(pfTsFile))
 				{
