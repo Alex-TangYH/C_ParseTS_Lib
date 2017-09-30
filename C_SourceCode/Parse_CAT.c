@@ -158,12 +158,20 @@ int ParseCAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, CAT_INFO_T *p
 					{
 						DUBUGPRINTF("Enter if (0 == IsSectionGetBefore) in PARSE_CAT\n");
 						ParseCAT_Section(pstTS_CAT, ucSectionBuffer);
+//						if (pstTS_CAT->uiSection_syntax_indicator != 0x1)
+//						{
+//							memset(pstTS_CAT, 0, sizeof(TS_CAT_T));
+//							uiRecordSectionNumber[0]--;
+//						}
+//						else
+//						{
 						//OPT:提取CA信息
 						//GetCAT_Info(&stTS_CAT, iDescriptorCount, pstCAT_Info, &iInfoCount);
 						if (1 == PRINTFCAT_INFO)
 						{
 							PrintCAT(pstTS_CAT);
 						}
+//						}
 					}
 					if (1 == IsAllSectionOver(ucSectionBuffer, uiRecordSectionNumber))
 					{

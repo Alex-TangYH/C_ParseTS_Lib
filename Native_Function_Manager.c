@@ -286,7 +286,6 @@ JNIEXPORT jobject JNICALL Java_com_alex_ts_1parser_native_1function_NativeFuncti
 			jclass totBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/si/TOT_Table");
 			jmethodID totConstrocMID = (*env)->GetMethodID(env, totBeanClass, "<init>", "(IIIII[III[Lcom/alex/ts_parser/bean/descriptor/Descriptor;I)V");
 			jintArray jIntArray = GetJintArrayFromIntArray(env, stTot.auiUTC_time, 5);
-			
 			jclass descriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/Descriptor");
 			int iDescriptorCount = GetDescriptorCountInBuffer(stTot.aucDescriptor, stTot.uiDescriptors_loop_length);
 			jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
@@ -748,7 +747,6 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 	LOCAL_TIME_OFFSET_DESCRIPTOR_T stLocalTimeOffsetDescriptor = { 0 };
 	TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR_T stTerrestrialDeliverySystemDescriptor = { 0 };
 	FREQUENCY_LIST_DESCRIPTOR_T stFrequencyListDescriptor = { 0 };
-
 	COMPONENT_DESCRIPTOR_T stComponentDescriptor = { 0 };
 	CONTENT_DESCRIPTOR_T stContentDescriptor = { 0 };
 	PARENTAL_RATING_DESCRIPTOR_T stParentalRatingDescriptor = { 0 };
@@ -773,9 +771,9 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 			jobject descriptorBean;
 			jobject tempObject;
 			jobjectArray tempObjectArray;
-			jbyteArray byteArrayData;
 			int iLoopIndex = 0;
 			int iLoopCount = 0;
+			// TODO 每一个case的内容提取为一个方法
 			switch (iTag)
 			{
 				case VIDEO_STREAM_DESCRIPTOR_TAG:
@@ -846,10 +844,10 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 					GetNetworkNameDescriptor(&stNetworkNameDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
 					jclass networkNameDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/NetworkNameDescriptor");
 					jmethodID networkNameDescriptorConstrocMID = (*env)->GetMethodID(env, networkNameDescriptorBeanClass, "<init>", "(II[B)V");
-					byteArrayData = GetJByteArrayByUChar(env, stNetworkNameDescriptor.aucInfo, stNetworkNameDescriptor.uiDescriptor_length);
-					descriptorBean = (*env)->NewObject(env, networkNameDescriptorBeanClass, networkNameDescriptorConstrocMID, stNetworkNameDescriptor.uiDescriptor_tag, stNetworkNameDescriptor.uiDescriptor_length, byteArrayData);
+					jbyteArray byteArrayData1 = GetJByteArrayByUChar(env, stNetworkNameDescriptor.aucInfo, stNetworkNameDescriptor.uiDescriptor_length);
+					descriptorBean = (*env)->NewObject(env, networkNameDescriptorBeanClass, networkNameDescriptorConstrocMID, stNetworkNameDescriptor.uiDescriptor_tag, stNetworkNameDescriptor.uiDescriptor_length, byteArrayData1);
 					(*env)->DeleteLocalRef(env, networkNameDescriptorBeanClass);
-					(*env)->DeleteLocalRef(env, byteArrayData);
+					(*env)->DeleteLocalRef(env, byteArrayData1);
 					break;
 				case SERVICE_LIST_DESCRIPTOR_TAG:
 					GetServiceListDescriptor(&stServiceListDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
@@ -909,29 +907,29 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 					{
 						jmethodID linkageDescriptor_08_ConstrocMID = (*env)->GetMethodID(env, linkageDescriptorBeanClass, "<init>", "(IIIIIIIIIII[B)V");
 						LINKAGE_UNION_08_T stUnion08 = stLinkageDescriptor.stLinkage_info_union.stLinkage_union_08;
-						byteArrayData = GetJByteArrayByUChar(env, stLinkageDescriptor.aucPrivate_data, stLinkageDescriptor.uiDescriptor_length - 7 - 5);
+						jbyteArray byteArrayData2 = GetJByteArrayByUChar(env, stLinkageDescriptor.aucPrivate_data, stLinkageDescriptor.uiDescriptor_length - 7 - 5);
 						descriptorBean = (*env)->NewObject(env, linkageDescriptorBeanClass, linkageDescriptor_08_ConstrocMID, stLinkageDescriptor.uiDescriptor_tag, stLinkageDescriptor.uiDescriptor_length, stLinkageDescriptor.uiTransport_stream_id,
 								stLinkageDescriptor.uiOriginal_network_id, stLinkageDescriptor.uiService_id, stLinkageDescriptor.uiLinage_type, stUnion08.uiHand_over_type, stUnion08.uiReserved_future_use, stUnion08.uiOrigin_type, stUnion08.uiNetwork_id,
-								stUnion08.uiInitial_service_id, byteArrayData);
-						(*env)->DeleteLocalRef(env, byteArrayData);
+								stUnion08.uiInitial_service_id, byteArrayData2);
+						(*env)->DeleteLocalRef(env, byteArrayData2);
 					}
 					else if (0x0D == stLinkageDescriptor.uiLinage_type)
 					{
 						jmethodID linkageDescriptor_0d_ConstrocMID = (*env)->GetMethodID(env, linkageDescriptorBeanClass, "<init>", "(IIIIIIIIII[B)V");
 						LINKAGE_UNION_0D_T stUnion0d = stLinkageDescriptor.stLinkage_info_union.stLinkage_union_0d;
-						byteArrayData = GetJByteArrayByUChar(env, stLinkageDescriptor.aucPrivate_data, stLinkageDescriptor.uiDescriptor_length - 7 - 3);
+						jbyteArray byteArrayData3 = GetJByteArrayByUChar(env, stLinkageDescriptor.aucPrivate_data, stLinkageDescriptor.uiDescriptor_length - 7 - 3);
 						descriptorBean = (*env)->NewObject(env, linkageDescriptorBeanClass, linkageDescriptor_0d_ConstrocMID, stLinkageDescriptor.uiDescriptor_tag, stLinkageDescriptor.uiDescriptor_length, stLinkageDescriptor.uiTransport_stream_id,
 								stLinkageDescriptor.uiOriginal_network_id, stLinkageDescriptor.uiService_id, stLinkageDescriptor.uiLinage_type, stUnion0d.uiTarget_event_id, stUnion0d.uiTarget_listed, stUnion0d.uiEvent_simulcast, stUnion0d.uiReserved,
-								byteArrayData);
-						(*env)->DeleteLocalRef(env, byteArrayData);
+								byteArrayData3);
+						(*env)->DeleteLocalRef(env, byteArrayData3);
 					}
 					else
 					{
 						jmethodID linkageDescriptor_Defualt_ConstrocMID = (*env)->GetMethodID(env, linkageDescriptorBeanClass, "<init>", "(IIIIII[B)V");
-						byteArrayData = GetJByteArrayByUChar(env, stLinkageDescriptor.aucPrivate_data, stLinkageDescriptor.uiDescriptor_length - 7);
+						jbyteArray byteArrayData4 = GetJByteArrayByUChar(env, stLinkageDescriptor.aucPrivate_data, stLinkageDescriptor.uiDescriptor_length - 7);
 						descriptorBean = (*env)->NewObject(env, linkageDescriptorBeanClass, linkageDescriptor_Defualt_ConstrocMID, stLinkageDescriptor.uiDescriptor_tag, stLinkageDescriptor.uiDescriptor_length, stLinkageDescriptor.uiTransport_stream_id,
-								stLinkageDescriptor.uiOriginal_network_id, stLinkageDescriptor.uiService_id, stLinkageDescriptor.uiLinage_type, byteArrayData);
-						(*env)->DeleteLocalRef(env, byteArrayData);
+								stLinkageDescriptor.uiOriginal_network_id, stLinkageDescriptor.uiService_id, stLinkageDescriptor.uiLinage_type, byteArrayData4);
+						(*env)->DeleteLocalRef(env, byteArrayData4);
 					}
 					break;
 				case SHORT_EVENT_DESCRIPTOR_TAG:
@@ -940,14 +938,14 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 					jmethodID shortEventDescriptorConstrocMID = (*env)->GetMethodID(env, shortEventDescriptorBeanClass, "<init>", "(IILcom/alex/ts_parser/bean/descriptor/ISO_639_LanguageCode;I[BI[B)V");
 
 					jobject iso639LanguageCodeBean = GetISO639LanguageCodeBean(env, &stShortEventDescriptor.stISO_639_Language_code);
-					byteArrayData = GetJByteArrayByUChar(env, stShortEventDescriptor.aucEvent_name_char, stShortEventDescriptor.uiEvent_name_length);
+					jbyteArray byteArrayData5 = GetJByteArrayByUChar(env, stShortEventDescriptor.aucEvent_name_char, stShortEventDescriptor.uiEvent_name_length);
 					jbyteArray textCharArray = GetJByteArrayByUChar(env, stShortEventDescriptor.aucText_char, stShortEventDescriptor.uiText_length);
 
 					descriptorBean = (*env)->NewObject(env, shortEventDescriptorBeanClass, shortEventDescriptorConstrocMID, stShortEventDescriptor.uiDescriptor_tag, stShortEventDescriptor.uiDescriptor_length, iso639LanguageCodeBean,
-							stShortEventDescriptor.uiEvent_name_length, byteArrayData, stShortEventDescriptor.uiText_length, textCharArray);
+							stShortEventDescriptor.uiEvent_name_length, byteArrayData5, stShortEventDescriptor.uiText_length, textCharArray);
 					(*env)->DeleteLocalRef(env, shortEventDescriptorBeanClass);
 					(*env)->DeleteLocalRef(env, iso639LanguageCodeBean);
-					(*env)->DeleteLocalRef(env, byteArrayData);
+					(*env)->DeleteLocalRef(env, byteArrayData5);
 					(*env)->DeleteLocalRef(env, textCharArray);
 					break;
 				case EXTENDED_EVENT_DESCRIPTOR_TAG:
@@ -972,18 +970,18 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 					}
 					(*env)->DeleteLocalRef(env, extendedEventInfoBeanClass);
 
-					byteArrayData = GetJByteArrayByUChar(env, stExtendedEventDescriptor.aucText_char, stExtendedEventDescriptor.uiText_length);
+					jbyteArray byteArrayData6 = GetJByteArrayByUChar(env, stExtendedEventDescriptor.aucText_char, stExtendedEventDescriptor.uiText_length);
 
 					jclass extendedEventDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/ExtendedEventDescriptor");
 					jmethodID extendedEventDescriptorConstrocMID = (*env)->GetMethodID(env, extendedEventDescriptorBeanClass, "<init>",
 							"(IIIILcom/alex/ts_parser/bean/descriptor/ISO_639_LanguageCode;I[Lcom/alex/ts_parser/bean/descriptor/ExtendedEventInfo;I[B)V");
 					descriptorBean = (*env)->NewObject(env, extendedEventDescriptorBeanClass, extendedEventDescriptorConstrocMID, stExtendedEventDescriptor.uiDescriptor_tag, stExtendedEventDescriptor.uiDescriptor_length,
 							stExtendedEventDescriptor.uiDescriptor_number, stExtendedEventDescriptor.uiLast_descriptor_number, iso639LanguageCodeBeanObject, stExtendedEventDescriptor.uiLength_of_items, tempObjectArray,
-							stExtendedEventDescriptor.uiText_length, byteArrayData);
+							stExtendedEventDescriptor.uiText_length, byteArrayData6);
 					(*env)->DeleteLocalRef(env, iso639LanguageCodeBeanObject);
 					(*env)->DeleteLocalRef(env, tempObjectArray);
 					(*env)->DeleteLocalRef(env, extendedEventDescriptorBeanClass);
-					(*env)->DeleteLocalRef(env, byteArrayData);
+					(*env)->DeleteLocalRef(env, byteArrayData6);
 					break;
 				case STREAM_IDENTIFIER_DESCRIPTOR_TAG:
 					GetStreamIndentifierDescriptor(&stStreamIndentifierDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
@@ -1026,12 +1024,12 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 					for (iLoopIndex = 0; iLoopIndex < iLoopCount; iLoopIndex++)
 					{
 						LOCAL_TIME_OFFSET_INFO_T stLocalTimeOffsetInfo = stLocalTimeOffsetDescriptor.astLocalTimeOffset_Info[iLoopIndex];
-						byteArrayData = GetJByteArrayByUChar(env, stLocalTimeOffsetInfo.uiCountry_code, 3);
+						jbyteArray byteArrayData7 = GetJByteArrayByUChar(env, stLocalTimeOffsetInfo.uiCountry_code, 3);
 						jintArray jintArray = GetJintArrayFromIntArray(env, stLocalTimeOffsetInfo.auiTime_of_change, 5);
-						tempObject = (*env)->NewObject(env, localTimeOffsetInfoClass, localTimeOffsetInfoConstrocMID, byteArrayData, stLocalTimeOffsetInfo.uiCountry_region_id, stLocalTimeOffsetInfo.uiReserved,
+						tempObject = (*env)->NewObject(env, localTimeOffsetInfoClass, localTimeOffsetInfoConstrocMID, byteArrayData7, stLocalTimeOffsetInfo.uiCountry_region_id, stLocalTimeOffsetInfo.uiReserved,
 								stLocalTimeOffsetInfo.uiLocal_time_offset_polarity, stLocalTimeOffsetInfo.uiLocal_time_offset, jintArray, stLocalTimeOffsetInfo.uiNext_time_offset);
 						(*env)->SetObjectArrayElement(env, tempObjectArray, iLoopIndex, tempObject);
-						(*env)->DeleteLocalRef(env, byteArrayData);
+						(*env)->DeleteLocalRef(env, byteArrayData7);
 						(*env)->DeleteLocalRef(env, jintArray);
 						(*env)->DeleteLocalRef(env, tempObject);
 					}
@@ -1092,14 +1090,14 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 				case COMPONENT_DESCRIPTOR_TAG:
 					GetComponentDescriptor(&stComponentDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
 					tempObject = GetISO639LanguageCodeBean(env, &stComponentDescriptor.stISO_639_language_code);
-					byteArrayData = GetJByteArrayByUChar(env, stComponentDescriptor.aucText_char, stComponentDescriptor.uiDescriptor_length - 6);
+					jbyteArray byteArrayData8 = GetJByteArrayByUChar(env, stComponentDescriptor.aucText_char, stComponentDescriptor.uiDescriptor_length - 6);
 
 					jclass componentDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/ComponentDescriptor");
 					jmethodID componentDescriptorConstrocMID = (*env)->GetMethodID(env, componentDescriptorBeanClass, "<init>", "(IIIIIILcom/alex/ts_parser/bean/descriptor/ISO_639_LanguageCode;[B)V");
 					descriptorBean = (*env)->NewObject(env, componentDescriptorBeanClass, componentDescriptorConstrocMID, stComponentDescriptor.uiDescriptor_tag, stComponentDescriptor.uiDescriptor_length, stComponentDescriptor.uiReserved_future_use,
-							stComponentDescriptor.uiStream_content, stComponentDescriptor.uiComponent_type, stComponentDescriptor.uiComponent_tag, tempObject, byteArrayData);
+							stComponentDescriptor.uiStream_content, stComponentDescriptor.uiComponent_type, stComponentDescriptor.uiComponent_tag, tempObject, byteArrayData8);
 					(*env)->DeleteLocalRef(env, tempObject);
-					(*env)->DeleteLocalRef(env, byteArrayData);
+					(*env)->DeleteLocalRef(env, byteArrayData8);
 					(*env)->DeleteLocalRef(env, componentDescriptorBeanClass);
 					break;
 				case CONTENT_DESCRIPTOR_TAG:
@@ -1132,8 +1130,8 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 					for (iLoopIndex = 0; iLoopIndex < iLoopCount; iLoopIndex++)
 					{
 						PARENTAL_RATING_INFO_T stParentalRatingInfo = stParentalRatingDescriptor.astParental_rating_info[iLoopIndex];
-						byteArrayData = GetJByteArrayByUChar(env, stParentalRatingInfo.uiCountry_code, 3);
-						tempObject = (*env)->NewObject(env, parentalRatingInfoClass, parentalRatingInfoConstrocMID, byteArrayData, stParentalRatingInfo.uiRating);
+						jbyteArray byteArrayData9 = GetJByteArrayByUChar(env, stParentalRatingInfo.uiCountry_code, 3);
+						tempObject = (*env)->NewObject(env, parentalRatingInfoClass, parentalRatingInfoConstrocMID, byteArrayData9, stParentalRatingInfo.uiRating);
 						(*env)->SetObjectArrayElement(env, tempObjectArray, iLoopIndex, tempObject);
 						(*env)->DeleteLocalRef(env, tempObject);
 					}

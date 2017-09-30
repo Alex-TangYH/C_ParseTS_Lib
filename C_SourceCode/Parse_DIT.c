@@ -79,10 +79,18 @@ int ParseDIT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_DIT_T *pst
 				if (0 == IsSectionGetBefore(ucSectionBuffer, uiRecordGetSection))
 				{
 					ParseDIT_Section(pstTS_DIT, ucSectionBuffer);
+//					if (pstTS_DIT->uiSection_syntax_indicator != 0x1)
+//					{
+//						memset(pstTS_DIT, 0, sizeof(TS_DIT_T));
+//						uiRecordGetSection[0]--;
+//					}
+//					else
+//					{
 					if (1 == PRINTFDIT_INFO)
 					{
 						PrintDIT(pstTS_DIT);
 					}
+//					}
 				}
 				if (1 == IsAllSectionOver(ucSectionBuffer, uiRecordGetSection))
 				{

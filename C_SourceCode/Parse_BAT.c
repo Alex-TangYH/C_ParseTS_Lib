@@ -161,11 +161,20 @@ int ParseBAT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_BAT_T *pst
 				if (0 == IsSectionGetBefore(ucSectionBuffer, uiRecordGetSection))
 				{
 					iBAT_InfoCount = ParseBAT_Section(pstTS_BAT, ucSectionBuffer);
+//					if (pstTS_BAT->uiSection_syntax_indicator != 0x1)
+//					{
+//						memset(pstTS_BAT, 0, sizeof(TS_BAT_T));
+//						uiRecordGetSection[0]--;
+//						iBAT_InfoCount = 0;
+//					}
+//					else
+//					{
 					*piBatInfoCount = iBAT_InfoCount;
 					if (1 == PRINTFBAT_INFO)
 					{
 						PrintBAT(pstTS_BAT, iBAT_InfoCount);
 					}
+//					}
 				}
 				if (1 == IsAllSectionOver(ucSectionBuffer, uiRecordGetSection))
 				{

@@ -8,12 +8,7 @@ typedef struct SECTION_HEAD_T
 	unsigned int uiZero :1;
 	unsigned int uiReservedFirst :2;
 	unsigned int uiSection_Length :12;
-	unsigned int uiTransport_stream_id :16;
-	unsigned int uiReservedSecond :2;
 	unsigned int uiVersion_number :5;
-	unsigned int uiCurrent_next_indicator :1;
-	unsigned int uiSection_number :8;
-	unsigned int uiLast_section_number :8;
 } SECTION_HEAD_T;
 
 typedef struct TS_PACKAGE_HEAD_T

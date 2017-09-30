@@ -257,7 +257,7 @@ int parseStream(char *pcFilePath)
  ****************************************************************/
 int main()
 {
-	char cTestFilePath[] = "D:\\test\\test.ts";
+	char cTestFilePath[] = "D:\\test\\standent2.ts";
 	parseStream(cTestFilePath);
 	Test();
 	return 1;

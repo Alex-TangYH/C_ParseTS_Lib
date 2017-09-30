@@ -89,16 +89,16 @@ int ParseTOT_Table(FILE *pfTsFile, int iTsPosition, int iTsLength, TS_TOT_T *pst
 				fseek(pfTsFile, 0 - iTsLength, SEEK_CUR);
 				break;
 			case 1:
-				if (0 == IsSectionGetBefore(ucSectionBuffer, uiRecordGetSection))
+//				if (0 == IsSectionGetBefore(ucSectionBuffer, uiRecordGetSection))
+//				{
+				ParseTOT_Section(pstTS_TOT, ucSectionBuffer);
+				if (1 == PRINTFTOT_INFO)
 				{
-					ParseTOT_Section(pstTS_TOT, ucSectionBuffer);
-					if (1 == PRINTFTOT_INFO)
-					{
-						PrintTOT(pstTS_TOT);
-					}
-					DUBUGPRINTF("\n=================================ParseTOT_Table END=================================== \n\n");
-					return 1;
+					PrintTOT(pstTS_TOT);
 				}
+				DUBUGPRINTF("\n=================================ParseTOT_Table END=================================== \n\n");
+				return 1;
+//				}
 				break;
 			case 2:
 				break;

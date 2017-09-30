@@ -202,22 +202,16 @@ static void PrintTS_PES_HEAD(TS_PACKAGE_HEAD_T stTS_PackageHead)
  * 解析PAT Section头部部分数据
  *********************************************/
 
-void ParsePATSectionHeader(SECTION_HEAD_T *pstSectionHead, unsigned char *pucPackageBuffer)
+void ParseSectionHeader(SECTION_HEAD_T *pstSectionHead, unsigned char *pucPackageBuffer)
 {
 	int iPayloadPosition = -1;
-
 	iPayloadPosition = GetTheLoadBeginPostion(pucPackageBuffer);
 	pstSectionHead->uiTable_id = pucPackageBuffer[iPayloadPosition];
 	pstSectionHead->uiSection_syntax_indicator = pucPackageBuffer[1 + iPayloadPosition] >> 7;
 	pstSectionHead->uiZero = (pucPackageBuffer[1 + iPayloadPosition] >> 6) & 0x1;
 	pstSectionHead->uiReservedFirst = (pucPackageBuffer[1 + iPayloadPosition] >> 4) & 0x3;
 	pstSectionHead->uiSection_Length = (pucPackageBuffer[1 + iPayloadPosition] & 0xf) << 8 | (pucPackageBuffer[2 + iPayloadPosition]);
-	pstSectionHead->uiTransport_stream_id = pucPackageBuffer[3 + iPayloadPosition] << 8 | pucPackageBuffer[4 + iPayloadPosition];
-	pstSectionHead->uiReservedSecond = pucPackageBuffer[5 + iPayloadPosition] >> 6;
 	pstSectionHead->uiVersion_number = (pucPackageBuffer[5 + iPayloadPosition] >> 1) & 0x1f;
-	pstSectionHead->uiCurrent_next_indicator = (pucPackageBuffer[5 + iPayloadPosition] << 7) >> 7;
-	pstSectionHead->uiSection_number = pucPackageBuffer[6 + iPayloadPosition];
-	pstSectionHead->uiLast_section_number = pucPackageBuffer[7 + iPayloadPosition];
 }
 
 /*********************************************
@@ -292,9 +286,12 @@ int GetOneSection(FILE *pfTsFile, int iTsLength, unsigned char *pucSectionBuffer
 
 			if ((1 == stTS_PackageHead.uiPayload_unit_start_indicator) && ((ucPackageBuffer[iPayloadPosition] == uiTableId) || (DEFAULT_TABLE_ID == uiTableId)) && (1 != iFlagSectionStart))
 			{
-				ParsePATSectionHeader(&stSectionHead, ucPackageBuffer);
-
-				if (1 == IsVersionChange(&stSectionHead, puiVersion))
+				ParseSectionHeader(&stSectionHead, ucPackageBuffer);
+				if (uiTableId != 0x73 && uiTableId != 0x70 && stSectionHead.uiSection_syntax_indicator != 1)
+				{
+					continue;
+				}
+				if (uiTableId != 0x73 && uiTableId != 0x70 && 1 == IsVersionChange(&stSectionHead, puiVersion))
 				{
 					return 0; /* version number change */
 				}
@@ -321,8 +318,7 @@ int GetOneSection(FILE *pfTsFile, int iTsLength, unsigned char *pucSectionBuffer
 		{
 			if (1 == IsOneSectionOver(stSectionHead, iAlreadyAddSection))
 			{
-				return 1;
-
+//				return 1;
 				if (1 == isHasCRC32_TableId(uiTableId))	// 如果属于需要CRC32校验的表格 先进行CRC32校验 通过TABLEID判断
 				{
 					if (1 == Verify_CRC_32(pucSectionBuffer))
