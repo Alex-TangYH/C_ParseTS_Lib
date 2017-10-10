@@ -563,26 +563,24 @@ JNIEXPORT jobjectArray JNICALL Java_com_alex_ts_1parser_native_1function_NativeF
 
 				TS_EIT_T stEit = astEitArray[iTableIndex];
 				jobjectArray eitInfoBeanArray = (*env)->NewObjectArray(env, stEit.eitInfoCount, eitInfoBeanClass, NULL);
-				if (stEit.eitInfoCount > 0)
+				for (iLoopIndex = 0; iLoopIndex < stEit.eitInfoCount; iLoopIndex++)
 				{
-					for (iLoopIndex = 0; iLoopIndex < stEit.eitInfoCount; iLoopIndex++)
-					{
-						int iDescriptorCount = 0;
-						iDescriptorCount = GetDescriptorCountInBuffer(stEit.astEIT_info[iLoopIndex].aucDescriptor, stEit.astEIT_info[iLoopIndex].uiDescriptors_loop_length);
-						jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
-						ParseDescriptorToJArray(env, &descriptorBeanArray, stEit.astEIT_info[iLoopIndex].aucDescriptor, stEit.astEIT_info[iLoopIndex].uiDescriptors_loop_length);
-						jintArray startTimeArray = GetJintArrayFromIntArray(env, stEit.astEIT_info[iLoopIndex].auiStart_time, 5);
-						jintArray durationArray = GetJintArrayFromIntArray(env, stEit.astEIT_info[iLoopIndex].uiDuration, 3);
+					int iDescriptorCount = 0;
+					iDescriptorCount = GetDescriptorCountInBuffer(stEit.astEIT_info[iLoopIndex].aucDescriptor, stEit.astEIT_info[iLoopIndex].uiDescriptors_loop_length);
 
-						jobject eitInfoBean = (*env)->NewObject(env, eitInfoBeanClass, eitInfoBeanConstrocMID, stEit.astEIT_info[iLoopIndex].uiEvent_id, startTimeArray, durationArray, stEit.astEIT_info[iLoopIndex].uiRunning_status,
-								stEit.astEIT_info[iLoopIndex].uiFree_CA_mode, stEit.astEIT_info[iLoopIndex].uiDescriptors_loop_length, descriptorBeanArray);
+					jobjectArray descriptorBeanArray = (*env)->NewObjectArray(env, iDescriptorCount, descriptorBeanClass, NULL);
+					ParseDescriptorToJArray(env, &descriptorBeanArray, stEit.astEIT_info[iLoopIndex].aucDescriptor, stEit.astEIT_info[iLoopIndex].uiDescriptors_loop_length);
+					jintArray startTimeArray = GetJintArrayFromIntArray(env, stEit.astEIT_info[iLoopIndex].auiStart_time, 5);
+					jintArray durationArray = GetJintArrayFromIntArray(env, stEit.astEIT_info[iLoopIndex].uiDuration, 3);
 
-						(*env)->SetObjectArrayElement(env, eitInfoBeanArray, iLoopIndex, eitInfoBean);
-						(*env)->DeleteLocalRef(env, descriptorBeanArray);
-						(*env)->DeleteLocalRef(env, startTimeArray);
-						(*env)->DeleteLocalRef(env, durationArray);
-						(*env)->DeleteLocalRef(env, eitInfoBean);
-					}
+					jobject eitInfoBean = (*env)->NewObject(env, eitInfoBeanClass, eitInfoBeanConstrocMID, stEit.astEIT_info[iLoopIndex].uiEvent_id, startTimeArray, durationArray, stEit.astEIT_info[iLoopIndex].uiRunning_status,
+							stEit.astEIT_info[iLoopIndex].uiFree_CA_mode, stEit.astEIT_info[iLoopIndex].uiDescriptors_loop_length, descriptorBeanArray);
+
+					(*env)->SetObjectArrayElement(env, eitInfoBeanArray, iLoopIndex, eitInfoBean);
+					(*env)->DeleteLocalRef(env, descriptorBeanArray);
+					(*env)->DeleteLocalRef(env, startTimeArray);
+					(*env)->DeleteLocalRef(env, durationArray);
+					(*env)->DeleteLocalRef(env, eitInfoBean);
 				}
 
 				jobject eitBean = (*env)->NewObject(env, eitBeanClass, eitConstrocMID, stEit.uiTable_id, stEit.uiSection_syntax_indicator, stEit.uiReserved_future_use_first, stEit.uiReserved_first, stEit.uiSection_length, stEit.uiService_id,
@@ -1228,23 +1226,23 @@ FILE* GetFilePointer(char acFilePath[])
  * String to char Pointer
  *
  ******************************************************/
-char* Jstring2CharPointer(JNIEnv *env, jstring filePath)
+char* Jstring2CharPointer(JNIEnv *env, jstring stringData)
 {
-	char* pcFilePath = NULL;
+	char* pcData = NULL;
 	jclass clsstring = (*env)->FindClass(env, "java/lang/String");
 	jmethodID mid = (*env)->GetMethodID(env, clsstring, "getBytes", "(Ljava/lang/String;)[B");
 	jstring strencode = (*env)->NewStringUTF(env, "GB2312");
-	jbyteArray barr = (jbyteArray) (*env)->CallObjectMethod(env, filePath, mid, strencode);
+	jbyteArray barr = (jbyteArray) (*env)->CallObjectMethod(env, stringData, mid, strencode);
 	jbyte* ba = (*env)->GetByteArrayElements(env, barr, JNI_FALSE);
 	jsize alen = (*env)->GetArrayLength(env, barr);
 	if (alen > 0)
 	{
-		pcFilePath = (char*) malloc(alen + 1);
-		memcpy(pcFilePath, ba, alen);
-		pcFilePath[alen] = 0;
+		pcData = (char*) malloc(alen + 1);
+		memcpy(pcData, ba, alen);
+		pcData[alen] = 0;
 	}
 	(*env)->ReleaseByteArrayElements(env, barr, ba, 0);
-	return pcFilePath;
+	return pcData;
 }
 /******************************************************
  *

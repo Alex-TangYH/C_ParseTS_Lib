@@ -1,7 +1,7 @@
 #ifndef _PARSE_EIT_H_
 #define _PARSE_EIT_H_
 
-#define EIT_INFO_MAX 20
+#define EIT_INFO_MAX 100
 #define EIT_DESCRIPTOR_MAX 100
 
 typedef struct EIT_INFO_T
