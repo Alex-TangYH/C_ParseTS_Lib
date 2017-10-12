@@ -39,7 +39,7 @@ void Print_BouquetNameDescriptor(BOUQUET_NAME_DESCRIPTOR_T *pstBouquetNameDescri
 	if (pstBouquetNameDescriptor->uiDescriptor_length > 0)
 	{
 		DUBUGPRINTF("%s©À©¤BouquetNameDescriptor.Descriptor_length: 0x%02x\n", pacOutputPrefix, pstBouquetNameDescriptor->uiDescriptor_length);
-		DUBUGPRINTF("%s©¸©¤BouquetNameDescriptor.Info: %s\n", pacOutputPrefix, pstBouquetNameDescriptor->aucInfo);
+		DUBUGPRINTF("%s©¸©¤BouquetNameDescriptor.Info: %s\n", pacOutputPrefix, pstBouquetNameDescriptor->aucBouquetName);
 	}
 	else
 	{

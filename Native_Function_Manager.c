@@ -1079,12 +1079,15 @@ int ParseDescriptorToJArray(JNIEnv *env, jobjectArray *pDescriptorBeanArray, uns
 //					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
 //					(*env)->DeleteLocalRef(env, caDescriptorBeanClass);
 //					break;
-//				case BOUQUET_NAME_DESCRIPTOR_TAG:
-//					GetBouquetNameDescriptor(&stBouquetNameDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
-//					jclass caDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/CA_Descriptor");
-//					jmethodID caDescriptorConstrocMID = (*env)->GetMethodID(env, caDescriptorBeanClass, "<init>", "(IIIII[B)V");
-//					descriptorBean = (*env)->NewObject(env, caDescriptorBeanClass, caDescriptorConstrocMID, stCA_Descriptor.uiDescriptor_tag);
-//					break;
+				case BOUQUET_NAME_DESCRIPTOR_TAG:
+					GetBouquetNameDescriptor(&stBouquetNameDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
+					jclass bouquetNameDescriptorBeanClass = (*env)->FindClass(env, "com/alex/ts_parser/bean/descriptor/BouquetNameDescriptor");
+					jmethodID bouquetNameDescriptorConstrocMID = (*env)->GetMethodID(env, bouquetNameDescriptorBeanClass, "<init>", "(II[B)V");
+					jbyteArray byteArrayBouquetName = GetJByteArrayByUChar(env, stBouquetNameDescriptor.aucBouquetName, stBouquetNameDescriptor.uiDescriptor_length);
+					descriptorBean = (*env)->NewObject(env, bouquetNameDescriptorBeanClass, bouquetNameDescriptorConstrocMID, stBouquetNameDescriptor.uiDescriptor_tag, stBouquetNameDescriptor.uiDescriptor_length, byteArrayBouquetName);
+					(*env)->DeleteLocalRef(env, bouquetNameDescriptorBeanClass);
+					(*env)->DeleteLocalRef(env, byteArrayBouquetName);
+					break;
 				case COMPONENT_DESCRIPTOR_TAG:
 					GetComponentDescriptor(&stComponentDescriptor, pucDescriptorBuffer, iDescriptorBufferLength, iDescriptorPosition);
 					tempObject = GetISO639LanguageCodeBean(env, &stComponentDescriptor.stISO_639_language_code);

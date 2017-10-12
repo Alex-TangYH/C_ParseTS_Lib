@@ -176,7 +176,7 @@ typedef struct BOUQUET_NAME_DESCRIPTOR_T
 {
 	unsigned int uiDescriptor_tag :8;
 	unsigned int uiDescriptor_length :8;
-	unsigned char aucInfo[BOUQUET_NAME_DESCRIPTOR_INFO_MAX];
+	unsigned char aucBouquetName[BOUQUET_NAME_DESCRIPTOR_INFO_MAX];
 } BOUQUET_NAME_DESCRIPTOR_T;
 
 typedef struct SERVICE_DESCRIPTOR_T

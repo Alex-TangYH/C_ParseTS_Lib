@@ -128,7 +128,7 @@ int GetBouquetNameDescriptor(BOUQUET_NAME_DESCRIPTOR_T *pstBouquetNameDescriptor
 	memset(pstBouquetNameDescriptor, 0, sizeof(BOUQUET_NAME_DESCRIPTOR_T));
 	pstBouquetNameDescriptor->uiDescriptor_tag = pucDescriptorBuffer[iDescriptorPosition];
 	pstBouquetNameDescriptor->uiDescriptor_length = pucDescriptorBuffer[1 + iDescriptorPosition];
-	memcpy(pstBouquetNameDescriptor->aucInfo, pucDescriptorBuffer + 2 + iDescriptorPosition, pstBouquetNameDescriptor->uiDescriptor_length);
+	memcpy(pstBouquetNameDescriptor->aucBouquetName, pucDescriptorBuffer + 2 + iDescriptorPosition, pstBouquetNameDescriptor->uiDescriptor_length);
 	return iDescriptorPosition;
 }
 
